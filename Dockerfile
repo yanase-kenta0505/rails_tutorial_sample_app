@@ -1,9 +1,11 @@
-FROM ruby:2.7.6-buster
-WORKDIR /app/sample_app
+FROM ruby:2.7.6
+RUN apt-get update -qq && apt-get install -y build-essential libpq-dev nodejs
 
-RUN apt update \
-  && apt install --assume-yes sqlite3 \
-  && apt clean \
-  && rm -rf /var/lib/apt/lists/*
+RUN mkdir /myapp
+WORKDIR /myapp
 
-RUN gem install rails -v '5.1.6'
+COPY Gemfile /myapp/Gemfile
+COPY Gemfile.lock /myapp/Gemfile.lock
+
+RUN bundle install
+COPY . /myapp
