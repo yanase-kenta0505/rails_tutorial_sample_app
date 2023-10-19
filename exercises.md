@@ -14,13 +14,18 @@
     - ![](images/2023-10-18-21-38-41.png)
 
 5. サンプルアプリケーションにContact (問い合わせ先) ページを作成してください16 (ヒント: まずはリスト 3.15を参考にして、/static_pages/contactというURLのページに「Contact | Ruby on Rails Tutorial Sample App」というタイトルが存在するかどうかを確認するテストを最初に作成しましょう。次に、3.3.3でAboutページを作ったときのと同じように、Contactページにもリスト 3.40のコンテンツを表示してみましょう。)。
-    - `app/views/static_pages/contact.html.erb`
-    - ```
-        <% provide(:title, "Contact") %>
-        <h1>Contact</h1>
-        <p>
-            Contact the Ruby on Rails Tutorial about the sample app at the
-        <a href="https://railstutorial.jp/contact">contact page</a>.
-        </p>
-        ```
     - ![](images/2023-10-19-09-53-26.png)
+
+6. リスト 3.41にrootルーティングを追加したことで、root_urlというRailsヘルパーが使えるようになりました (以前、static_pages_home_urlが使えるようになったときと同じです)。リスト 3.42の（コードを書き込む）と記された部分を置き換えて、rootルーティングのテストを書いてみてください。
+    - ```
+        test "should get root" do
+            get  root_url
+            assert_response :success
+        end
+        ```
+
+7. 実はリスト 3.41のコードを書いていたので、先ほどの課題のテストは既に green になっているはずです。このような場合、テストを変更する前から成功していたのか、変更した後に成功するようになったのか、判断が難しいです。リスト 3.41のコードがテスト結果に影響を与えていることを確認するため、リスト 3.43のようにrootルーティングをコメントアウトして見て、 red になるかどうか確かめてみましょう (なおRubyのコメント機能については4.2.1で説明します)。最後に、コメントアウトした箇所を元に戻し (すなわちリスト 3.41に戻し)、テストが green になることを確認してみましょう。
+    - コメントアウト時
+        - `4 runs, 3 assertions, 0 failures, 1 errors, 0 skips`
+    - コメントアウト解除
+        - `4 runs, 4 assertions, 0 failures, 0 errors, 0 skips`
