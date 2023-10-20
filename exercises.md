@@ -130,3 +130,17 @@
 
 25. 比較演算子==を使って、上記２つの課題で作ったそれぞれのオブジェクトが同じであることを確認してみてください。
     - ![](images/2023-10-20-10-15-00.png)
+
+26. Rangeクラスの継承階層を調べてみてください。同様にして、HashとSymbolクラスの継承階層も調べてみてください。
+    - ```
+        irb(main):036:0> Range.superclass
+            => Object
+        irb(main):037:0> Object.superclass
+            => BasicObject
+        irb(main):038:0> BasicObject.superclass
+            => nil
+        irb(main):039:0> 
+      ```
+
+27. リスト 4.15にあるself.reverseのselfを省略し、reverseと書いてもうまく動くことを確認してみてください。
+    - ![](images/2023-10-20-10-29-23.png)
