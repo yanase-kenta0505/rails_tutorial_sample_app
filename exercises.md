@@ -259,4 +259,7 @@
     - ![](images/2023-10-21-22-46-26.png)
 
 13. リスト 5.29のようにhelfルーティングを作成し、レイアウトのリンクを更新してみてください。
-    - [変更コード](https://github.com/yanase-kenta0505/rails_tutorial_sample_app/commit/ab0e7755d2374bcfec211ec4475ea8edc1c2178a)
+    - [変更コミット](https://github.com/yanase-kenta0505/rails_tutorial_sample_app/commit/ab0e7755d2374bcfec211ec4475ea8edc1c2178a)
+
+14. 前回の演習と同様に、エディタのUndo機能を使ってこの演習で行った変更を元に戻してみてください。
+    - [変更を戻すコミット](https://github.com/yanase-kenta0505/rails_tutorial_sample_app/commit/2f16e6efdcba1272d39b969b558936f3b9985473)
