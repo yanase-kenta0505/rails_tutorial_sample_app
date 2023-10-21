@@ -233,3 +233,28 @@
             }
         }
      ```
+
+10. 実は名前付きルートは、as:オプションを使って変更することができます。有名なFar Sideの漫画に倣って、Helpページの名前付きルートをhelfに変更してみてください (リスト 5.29)。
+    - ```
+        Rails.application.routes.draw do
+            root 'static_pages#home'
+            get  '/help',    to: 'static_pages#help', as: :helf
+            get  '/about',   to: 'static_pages#about'
+            get  '/contact', to: 'static_pages#contact'
+        end
+      ```
+
+11. 先ほどの変更により、テストが redになっていることを確認してください。リスト 5.28を参考にルーティングを更新して、テストを greenにして見てください。
+    - ```
+        // static_pages_controller_test.rb
+
+        test "should get help" do
+            get helf_path
+            assert_response :success
+            assert_select "title", "Help | Ruby on Rails Tutorial Sample App"
+        end
+      ```
+
+12. エディタのUndo機能を使って、今回の演習で行った変更を元に戻して見てください。
+    - 
+    
