@@ -257,4 +257,6 @@
 
 12. エディタのUndo機能を使って、今回の演習で行った変更を元に戻して見てください。
     - ![](images/2023-10-21-22-46-26.png)
-     
+
+13. リスト 5.29のようにhelfルーティングを作成し、レイアウトのリンクを更新してみてください。
+    - [変更コード](https://github.com/yanase-kenta0505/rails_tutorial_sample_app/commit/ab0e7755d2374bcfec211ec4475ea8edc1c2178a)
