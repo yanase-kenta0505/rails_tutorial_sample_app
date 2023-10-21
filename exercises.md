@@ -205,4 +205,31 @@
     - ![](images/2023-10-21-17-11-46.png)
  
 8. layoutsディレクトリにheadタグ用のパーシャルを作成し、先ほど退避しておいたコードを書き込み、最後にテストが green に戻ることを確認しましょう。
-    - - ![](images/2023-10-21-17-13-39.png)
+    - ![](images/2023-10-21-17-13-39.png)
+
+9. 5.2.2で提案したように、footerのCSSを手作業で変換してみましょう。具体的には、リスト 5.17の内容を１つずつ変換していき、リスト 5.20のようにしてみてください。
+    -  ```
+        footer {
+            margin-top: 45px;
+            padding-top: 5px;
+            border-top: 1px solid $gray-medium-light;
+            color: $gray-light;
+            a {
+                color: $gray;
+                &:hover {
+                color: $gray-darker;
+                }
+            }
+            small {
+                float: left;
+            }
+            ul {
+                float: right;
+                list-style: none;
+                li {
+                float: left;
+                margin-left: 15px;
+                }
+            }
+        }
+     ```
