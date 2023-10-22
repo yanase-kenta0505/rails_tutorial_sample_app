@@ -269,3 +269,18 @@
 
 16. リスト 5.35で示すように、Applicationヘルパーで使っているfull_titleヘルパーを、test環境でも使えるようにすると便利です。こうしておくと、リスト 5.36のようなコードを使って、正しいタイトルをテストすることができます。ただし、これは完璧なテストではありません。例えばベースタイトルに「Ruby on Rails Tutoial」といった誤字があったとしても、このテストでは発見することができないでしょう。この問題を解決するためには、full_titleヘルパーに対するテストを書く必要があります。そこで、Applicationヘルパーをテストするファイルを作成し、リスト 5.37の（コードを書き込む）の部分を適切なコードに置き換えてみてください。ヒント: リスト 5.37ではassert_equal <期待される値>, <実際の値>といった形で使っていましたが、内部では==演算子で期待される値と実際の値を比較し、正しいかどうかのテストをしています。
     - [演習対応](https://github.com/yanase-kenta0505/rails_tutorial_sample_app/commit/29cfaea06ac2ff9affa056961378c38a5538ebc3)
+
+17. 表 5.1を参考にしながらリスト 5.41を変更し、users_new_urlではなくsignup_pathを使えるようにしてみてください。
+    - ```
+        // users_controller_test.rb
+
+        class UsersControllerTest < ActionDispatch::IntegrationTest
+            test "should get new" do
+                get signup_path
+                assert_response :success
+            end
+        end
+      ```
+
+18. 先ほどの変更を加えたことにより、テストが redになったことを確認してください。なお、この演習はテスト駆動開発 (コラム 3.3) で説明した red/green のリズムを作ることを目的としています。このテストは次の5.4.2で greenになるよう修正します。
+    - ![](images/2023-10-22-11-33-43.png)
