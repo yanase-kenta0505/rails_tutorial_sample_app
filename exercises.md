@@ -324,3 +324,9 @@
 
 5. 同様にして、ApplicationRecordがActiveRecord::Baseを継承していることについて確認してみてください。
     - ![](images/2023-10-23-11-55-10.png)
+
+6. user.nameとuser.emailが、どちらもStringクラスのインスタンスであることを確認してみてください。
+    - ![](images/2023-10-23-13-40-10.png)
+
+7. created_atとupdated_atは、どのクラスのインスタンスでしょうか?
+    - ![](images/2023-10-23-13-40-10.png)
