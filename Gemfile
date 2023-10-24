@@ -11,6 +11,7 @@ gem 'turbolinks',   '5.0.1'
 gem 'jbuilder',     '2.7.0'
 gem 'rails',          '5.1.6'
 gem 'bootstrap-sass', '3.3.7'
+gem 'aws-sdk-s3'
 
 group :development, :test do
   # 'sqlite3' gemを削除し、'mysql2' gemを追加
