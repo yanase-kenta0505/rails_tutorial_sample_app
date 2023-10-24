@@ -370,3 +370,20 @@
 
 22. foo@bar..comをRubularのメールアドレスのリストに追加し、リスト 6.23の正規表現をRubularで使ってみてください。有効なメールアドレスのみがすべてマッチし、無効なメールアドレスはすべてマッチしないことを確認してみましょう。
     - ![](images/2023-10-24-08-16-15.png)
+
+23. リスト 6.33のように、メールアドレスを小文字にするテストをリスト 6.26に追加してみましょう。ちなみに追加するテストコードでは、データベースの値に合わせて更新するreloadメソッドと、値が一致しているかどうか確認するassert_equalメソッドを使っています。リスト 6.33のテストがうまく動いているか確認するためにも、before_saveの行をコメントアウトして redになることを、また、コメントアウトを解除すると greenになることを確認してみましょう。
+    - ![](images/2023-10-24-09-28-22.png)
+
+24. テストスイートの実行結果を確認しながら、before_saveコールバックをemail.downcase!に書き換えてみましょう。ヒント: メソッドの末尾に!を付け足すことにより、email属性を直接変更できるようになります (リスト 6.34)。
+    - ```
+        class User < ApplicationRecord
+            before_save { email.downcase! }
+            validates :name, presence: true
+            validates :email, presence: true
+            validates :name, presence: true, length: { maximum: 50 }
+            VALID_EMAIL_REGEX = /\A[\w+\-.]+@[a-z\d\-]+(\.[a-z\d\-]+)*\.[a-z]+\z/i
+            validates :email, presence: true, length: { maximum: 255 },
+            format: { with: VALID_EMAIL_REGEX },
+            uniqueness: { case_sensitive: false }
+        end
+      ```
