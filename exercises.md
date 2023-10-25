@@ -580,3 +580,28 @@
 
 25. 自分のメールアドレスでユーザー登録を試してみましょう。既にGravatarに登録している場合、適切な画像が表示されているか確認してみてください。
     - ![](images/2023-10-25-15-29-56.png)
+
+26. 7.4.2で実装したflashに対するテストを書いてみてください。どのくらい細かくテストするかはお任せします。リスト 7.34に最小限のテンプレートを用意しておいたので、参考にしてください (（コードを書き込む）の部分を適切なコードに置き換えると完成します)。ちなみに、テキストに対するテストは壊れやすいです。文量の少ないflashのキーであっても、それは同じです。筆者の場合、flashが空でないかをテストするだけの場合が多いです。
+    - ```
+        test "valid signup information" do
+            get signup_path
+            assert_difference 'User.count', 1 do
+            post users_path, params: { user: { name:  "Example User",
+                                                email: "user@example.com",
+                                                password:              "password",
+                                                password_confirmation: "password" } }
+            end
+            follow_redirect!
+            assert_template 'users/show'
+            assert_not flash.empty?
+        end
+      ```
+
+27. 本文中でも指摘しましたが、flash用のHTML (リスト 7.31) は読みにくいです。より読みやすくしたリスト 7.35のコードに変更してみましょう。変更が終わったらテストスイートを実行し、正常に動作することを確認してください。なお、このコードでは、Railsのcontent_tagというヘルパーを使っています。
+    - ![](images/2023-10-25-15-52-26.png)
+
+28. リスト 7.28のリダイレクトの行をコメントアウトすると、テストが失敗することを確認してみましょう。
+    - ![](images/2023-10-25-15-57-37.png)
+
+29. リスト 7.28で、@user.saveの部分をfalseに置き換えたとしましょう (バグを埋め込んでしまったと仮定してください)。このとき、assert_differenceのテストではどのようにしてこのバグを検知するでしょうか? テストコードを追って考えてみてください。
+    - @user.saveをfalseに置き換えると、ユーザーは保存されない。User.countが増加しないため、assert_differenceの期待値と実際の値が一致しないことになり、バグを検知する
