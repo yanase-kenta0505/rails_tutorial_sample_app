@@ -567,3 +567,16 @@
         flash
         => nil
       ```
+
+24. Railsコンソールを使って、新しいユーザーが本当に作成されたのかもう一度チェックしてみましょう。結果は、リスト 7.32のようになるはずです。
+    - ```
+        user = User.first
+        (1.0ms)  SET NAMES utf8,  @@SESSION.sql_mode = CONCAT(CONCAT(@@sql_mode, ',STRICT_ALL_TABLES'), ',NO_AUTO_VALUE_ON_ZERO'),  @@SESSION.sql_auto_is_null = 0, @@SESSION.wait_timeout = 2147483
+        User Load (0.9ms)  SELECT  `users`.* FROM `users` ORDER BY `users`.`id` ASC LIMIT 1
+        => #<User id: 1, name: "Rails Tutorial", email: "example@railstutorial.org", created_at: "2023-10-25 06:25:14", updated_at: "2023-10-25 06:25:...
+        irb(main):002:0> user
+        => #<User id: 1, name: "Rails Tutorial", email: "example@railstutorial.org", created_at: "2023-10-25 06:25:14", updated_at: "2023-10-25 06:25:14", password_digest: "$2a$10$e4699Wb1ouSEJrmJGQ4gXe/oIUS63s1jC8nLpCTlYOb...">
+      ``` 
+
+25. 自分のメールアドレスでユーザー登録を試してみましょう。既にGravatarに登録している場合、適切な画像が表示されているか確認してみてください。
+    - ![](images/2023-10-25-15-29-56.png)
