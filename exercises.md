@@ -543,3 +543,27 @@
 
 21. リスト 7.28を更新し、redirect_to user_url(@user)とredirect_to @userが同じ結果になることを確認してみましょう。
     - ![](images/2023-10-25-14-43-17.png)
+
+22. コンソールに移り、文字列内の式展開 (4.2.2) でシンボルを呼び出してみましょう。例えば"#{:success}"といったコードを実行すると、どんな値が返ってきますか? 確認してみてください。
+    - ```
+        irb(main):009:0> puts "#{:success}"
+        success
+        => nil
+        irb(main):010:0> 
+      ```
+
+23. 先ほどの演習で試した結果を参考に、リスト 7.30のflashはどのような結果になるか考えてみてください。
+    - ```
+        irb(main):012:1* flash.each do |key, value|
+        irb(main):013:1*   puts "#{key}"
+        irb(main):014:1*   puts "#{value}"
+        irb(main):015:0> end
+        success
+        It worked!
+        danger
+        It failed.
+        => {:success=>"It worked!", :danger=>"It failed."}
+        irb(main):016:0> puts "#{:flash}"
+        flash
+        => nil
+      ```
