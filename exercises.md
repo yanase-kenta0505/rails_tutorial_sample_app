@@ -468,3 +468,69 @@
     - 送信済み
         - /users
     - 新しいユーザーを作成するためのフォームを表示するアクションはnewアクション（GETリクエスト）であり、実際に作成するアクションはcreateアクション（POSTリクエスト）であるためURLが異なる
+
+16. リスト 7.20で実装したエラーメッセージに対するテストを書いてみてください。どのくらい細かくテストするかはお任せします。リスト 7.25にテンプレートを用意しておいたので、参考にしてください。
+    - ```
+        require 'test_helper'
+
+        class UsersSignupTest < ActionDispatch::IntegrationTest
+
+        test "invalid signup information" do
+            get signup_path
+            assert_no_difference 'User.count' do
+            post users_path, params: { user: { name:  "",
+                                                email: "user@invalid",
+                                                password:              "foo",
+                                                password_confirmation: "bar" } }
+            end
+            assert_template 'users/new'
+            assert_select 'div#<CSS id for error explanation>'
+            assert_select 'div.<CSS class for field with error>'
+        end
+
+        test "email should be valid format" do
+            get signup_path
+            assert_no_difference 'User.count' do
+            post users_path, params: { user: { name:  "Example User",
+                                                email: "user@invalid,com",
+                                                password:              "password123",
+                                                password_confirmation: "password123" } }
+            end
+            assert_template 'users/new'
+            assert_select 'div#error_explanation'
+            assert_select 'div.field_with_errors', text: "Email is invalid"
+        end
+
+        test "email should be valid format" do
+            get signup_path
+            assert_no_difference 'User.count' do
+            post users_path, params: { user: { name:  "Example User",
+                                                email: "user@invalid,com",
+                                                password:              "password123",
+                                                password_confirmation: "password123" } }
+            end
+            assert_template 'users/new'
+            assert_select 'div#error_explanation'
+            assert_select 'div.field_with_errors', text: "Email is invalid"
+        end
+
+        test "password should be at least 6 characters" do
+            get signup_path
+            assert_no_difference 'User.count' do
+            post users_path, params: { user: { name:  "Example User",
+                                                email: "user@example.com",
+                                                password:              "pass",
+                                                password_confirmation: "pass" } }
+            end
+            assert_template 'users/new'
+            assert_select 'div#error_explanation'
+            assert_select 'div.field_with_errors', text: "Password is too short (minimum is 6 characters)"
+        end
+        
+        end
+
+      ```
+
+17. ユーザー登録フォームのURLは /signup ですが、無効なユーザー登録データを送付するとURLが /users に変わってしまいます。これはリスト 5.43で追加した名前付きルート (/signup) と、RESTfulなルーティング (リスト 7.3) のデフォルト設定との差異によって生じた結果です。リスト 7.26とリスト 7.27の内容を参考に、この問題を解決してみてください。うまくいけばどちらのURLも /signup になるはずです。あれ、でもテストは greenのままになっていますね...、なぜでしょうか? (考えてみてください)
+18. リスト 7.25のpost部分を変更して、先ほどの演習課題で作った新しいURL (/signup) に合わせてみましょう。また、テストが greenのままになっている点も確認してください。
+19. リスト 7.27のフォームを以前の状態 (リスト 7.20) に戻してみて、テストがやはり greenになっていることを確認してください。これは問題です! なぜなら、現在postが送信されているURLは正しくないのですから。assert_selectを使ったテストをリスト 7.25に追加し、このバグを検知できるようにしてみましょう (テストを追加して redになれば成功です)。その後、変更後のフォーム (リスト 7.27) に戻してみて、テストが green になることを確認してみましょう。ヒント: フォームから送信してテストするのではなく、'form[action="/signup"]'という部分が存在するかどうかに着目してテストしてみましょう。
