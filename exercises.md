@@ -701,3 +701,38 @@
 
 17. cookiesの内容を調べてみて、ログアウト後にはsessionが正常に削除されていることを確認してみましょう。
     - 確認しました。
+
+
+# 第9章
+## チェックシート
+## 演習
+1. コンソールを開き、データベースにある最初のユーザーを変数userに代入してください。その後、そのuserオブジェクトからrememberメソッドがうまく動くかどうか確認してみましょう。また、remember_tokenとremember_digestの違いも確認してみてください。
+    - ```sh
+        irb(main):001:0> user = User.first
+        (0.8ms)  SET NAMES utf8,  @@SESSION.sql_mode = CONCAT(CONCAT(@@sql_mode, ',STRICT_ALL_TABLES'), ',NO_AUTO_VALUE_ON_ZERO'),  @@SESSION.sql_auto_is_null = 0, @@SESSION.wait_timeout = 2147483
+        User Load (0.5ms)  SELECT  `users`.* FROM `users` ORDER BY `users`.`id` ASC LIMIT 1
+        => #<User id: 1, name: "Rails Tutorial", email: "example@railstutorial.org", created_at: "2023-10-25 06:25:14", updated_at: "2023-1...
+        irb(main):002:0> user.remember
+        (1.7ms)  BEGIN
+        SQL (21.6ms)  UPDATE `users` SET `updated_at` = '2023-10-26 09:36:14', `remember_digest` = '$2a$10$uRoubNJ2vJfIdC/.q4ASe.C6ROropjuLsIqLpo/qRP0msEzJKtkJu' WHERE `users`.`id` = 1
+        (2.4ms)  COMMIT
+        => true
+        irb(main):003:0> user.remember_token
+        => "COU4iSpUNRS8092sLflDKw"
+        irb(main):004:0> user.remember_digest
+        => "$2a$10$uRoubNJ2vJfIdC/.q4ASe.C6ROropjuLsIqLpo/qRP0msEzJKtkJu"
+        irb(main):005:0> 
+      ```
+    - remember_tokenは平文のトークン、remember_digestはハッシュ化されたダイジェスト
+
+2. リスト 9.3では、明示的にUserクラスを呼び出すことで、新しいトークンやダイジェスト用のクラスメソッドを定義しました。実際、User.new_tokenやUser.digestを使って呼び出せるようになったので、おそらく最も明確なクラスメソッドの定義方法であると言えるでしょう。しかし実は、より「Ruby的に正しい」クラスメソッドの定義方法が２通りあります。1つはややわかりにくく、もう1つは非常に混乱するでしょう。テストスイートを実行して、ややわかりにくいリスト 9.4の実装でも、非常に混乱しやすいリスト 9.5の実装でも、いずれも正しく動くことを確認してみてください。ヒント: selfは、通常の文脈ではUser「モデル」、つまりユーザーオブジェクトのインスタンスを指しますが、リスト 9.4やリスト 9.5の文脈では、selfはUser「クラス」を指すことにご注意ください。わかりにくさの原因の一部はこの点にあります。
+    - ```sh
+        claves@clavesnoMacBook-Air sample_app % rails test
+
+        Started with run options --seed 43093
+
+        25/25: [=========================================================================================] 100% Time: 00:00:00, Time: 00:00:00
+
+        Finished in 0.33003s
+        25 tests, 69 assertions, 0 failures, 0 errors, 0 skips
+      ```
