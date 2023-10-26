@@ -749,3 +749,8 @@
         irb(main):003:0> user.authenticated?('5HYs7lmjd3U1QBm760UEMA')
         => true
       ```
+
+5. ログアウトした後に、ブラウザの対応するcookiesが削除されていることを確認してみましょう。
+   - 確認しました
+
+6. 
