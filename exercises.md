@@ -645,3 +645,5 @@
                POST   /login(.:format)          sessions#create
         logout DELETE /logout(.:format)         sessions#destroy
       ```
+3. リスト 8.4で定義したフォームで送信すると、Sessionsコントローラのcreateアクションに到達します。Railsはこれをどうやって実現しているでしょうか? 考えてみてください。ヒント:表 8.1とリスト 8.5の１行目に注目してください。
+    - loginというパスに対してcreateアクションを割り当てています。具体的には、post 'login', to: 'sessions#create'というルーティングが定義されています。
