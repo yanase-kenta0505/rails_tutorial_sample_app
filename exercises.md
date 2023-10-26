@@ -736,3 +736,8 @@
         Finished in 0.33003s
         25 tests, 69 assertions, 0 failures, 0 errors, 0 skips
       ```
+
+3. ブラウザのcookieを調べ、ログイン後のブラウザではremember_tokenと暗号化されたuser_idがあることを確認してみましょう。
+    - ![](images/2023-10-27-6-16-34.png)
+
+4. コンソールを開き、リスト 9.6のauthenticated?メソッドがうまく動くかどうか確かめてみましょう。
