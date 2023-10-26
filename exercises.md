@@ -738,6 +738,14 @@
       ```
 
 3. ブラウザのcookieを調べ、ログイン後のブラウザではremember_tokenと暗号化されたuser_idがあることを確認してみましょう。
-    - ![](images/2023-10-27-6-16-34.png)
+    - 確認しました
 
 4. コンソールを開き、リスト 9.6のauthenticated?メソッドがうまく動くかどうか確かめてみましょう。
+    - ```sh
+        irb(main):002:0> user = User.first
+        (1.0ms)  SET NAMES utf8,  @@SESSION.sql_mode = CONCAT(CONCAT(@@sql_mode, ',STRICT_ALL_TABLES'), ',NO_AUTO_VALUE_ON_ZERO'),  @@SESSION.sql_auto_is_null = 0, @@SESSION.wait_timeout = 2147483
+        User Load (1.1ms)  SELECT  `users`.* FROM `users` ORDER BY `users`.`id` ASC LIMIT 1
+        => #<User id: 1, name: "Rails Tutorial", email: "example@railstutorial.org", created_at: "2023-10-26 22:01...
+        irb(main):003:0> user.authenticated?('5HYs7lmjd3U1QBm760UEMA')
+        => true
+      ```
