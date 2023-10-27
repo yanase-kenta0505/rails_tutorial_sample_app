@@ -415,3 +415,218 @@
 30. オブジェクトが検索できたら、名前を新しい文字列に置き換え、saveメソッドで更新してみてください。うまくいきませんね...、なぜうまくいかなかったのでしょうか?
 31. 今度は6.1.5で紹介したテクニックを使って、userの名前を更新してみてください。
     - ![](images/2023-10-24-21-38-25.png)
+
+# 第7章
+## チェックシート
+1. Railsではデフォルトで3つの環境が用意されていますが、この「環境」とは何を目的に用意されているものでしょうか？
+    - development
+        - 開発を手助けするようにデバックが容易になるるように設定されている
+    - test
+        - テストを実行するため
+        - テスト実行の速度が優先され、テストデータベースはテストのたびにリセットされることが一般的
+    - production
+        - 実際にユーザーが使用する際の設定が適用される
+2. Strong Parametersはどのような目的で使用するものでしょうか？
+    - マスアサインメントの脆弱性を防ぐために使用される。
+    不正なユーザーがフォームを通じて送信されたデータを操作し、許可されていない属性を変更するのを防ぐ。
+    開発者は許可されたパラメータのみを明示的に指定することで、セキュリティを強化できる。
+3. flashとflash.nowの違いはなんでしょうか？以下の単語を用いて説明してください。
+・アクション
+・データ
+    - flashは一度設定すると次のアクションが完了するまで持続する。成功やエラーメッセージを表示するときに使われる
+    - 一方flash.nowは現在のアクションのみで使用され、データは次のアクションには持続しない。
+
+## 演習
+1. ブラウザから /about にアクセスし、デバッグ情報が表示されていることを確認してください。このページを表示するとき、どのコントローラとアクションが使われていたでしょうか? paramsの内容から確認してみましょう。
+    - コントローラ
+        - static_pages
+    - アクション
+        - about
+
+2. Railsコンソールを開き、データベースから最初のユーザー情報を取得し、変数userに格納してください。その後、puts user.attributes.to_yamlを実行すると何が表示されますか? ここで表示された結果と、yメソッドを使ったy user.attributesの実行結果を比較してみましょう。
+    - ![](images/2023-10-24-22-11-45.png)
+
+3. 埋め込みRubyを使って、マジックカラム (created_atとupdated_at) の値をshowページに表示してみましょう (リスト 7.4)。
+4. 埋め込みRubyを使って、Time.nowの結果をshowページに表示してみましょう。ページを更新すると、その結果はどう変わっていますか? 確認してみてください。
+    - ![](images/2023-10-24-23-01-23.png)
+5. showアクションの中にdebuggerを差し込み (リスト 7.6)、ブラウザから /users/1 にアクセスしてみましょう。その後コンソールに移り、putsメソッドを使ってparamsハッシュの中身をYAML形式で表示してみましょう。ヒント: 7.1.1.1の演習を参考にしてください。その演習ではdebugメソッドで表示したデバッグ情報を、どのようにしてYAML形式で表示していたでしょうか?
+    - ![](images/2023-10-24-23-50-56.png)
+6. newアクションの中にdebuggerを差し込み、/users/new にアクセスしてみましょう。@userの内容はどのようになっているでしょうか? 確認してみてください。
+    - ![](images/2023-10-24-23-55-03.png)
+
+7. (任意) Gravatar上にアカウントを作成し、あなたのメールアドレスと適当な画像を紐付けてみてください。メールアドレスをMD5ハッシュ化して、紐付けた画像がちゃんと表示されるかどうか試してみましょう。
+    - ![](images/2023-10-25-09-50-20.png)
+
+8. 7.1.4で定義したgravatar_forヘルパーをリスト 7.12のように変更して、sizeをオプション引数として受け取れるようにしてみましょう。うまく変更できると、gravatar_for user, size: 50といった呼び出し方ができるようになります。重要: この改善したヘルパーは10.3.1で実際に使います。忘れずに実装しておきましょう。
+    - ![](images/2023-10-25-10-11-14.png)
+
+9. オプション引数は今でもRubyコミュニティで一般的に使われていますが、Ruby 2.0から導入された新機能「キーワード引数 (Keyword Arguments)」でも実現することができます。先ほど変更したリスト 7.12を、リスト 7.13のように置き換えてもうまく動くことを確認してみましょう。この２つの実装方法はどういった違いがあるのでしょうか? 考えてみてください。
+    - ![](images/2023-10-25-10-12-14.png)
+
+10. 試しに、リスト 7.15にある:nameを:nomeに置き換えてみましょう。どんなエラーメッセージが表示されるようになりますか?
+    - ![](images/2023-10-25-10-26-57.png)
+
+11. 試しに、ブロックの変数fをすべてfoobarに置き換えてみて、結果が変わらないことを確認してみてください。確かに結果は変わりませんが、変数名をfoobarとするのはあまり良い変更ではなさそうですね。その理由について考えてみてください。
+    - ![](images/2023-10-25-10-28-14.png)
+    - fはフォームビルダーオブジェクトを指す慣習的な変数名であり、多くのRails開発者がこの慣習に従っています。
+    一方、foobarは具体的な意味を持たないため、コードを読む他の開発者にとってはわかりにくくなります。
+
+12. 『HTML編』ではHTMLをすべて手動で書き起こしていますが、なぜformタグを使わなかったのでしょうか? 理由を考えてみてください。
+    - Railsではヘルパーメソッドを使用することが推奨されているから
+
+13. /signup?admin=1 にアクセスし、paramsの中にadmin属性が含まれていることをデバッグ情報から確認してみましょう。
+    - ![](images/2023-10-25-11-18-39.png)
+
+14. 最小文字数を5に変更すると、エラーメッセージも自動的に更新されることを確かめてみましょう。
+    - ![](images/2023-10-25-11-44-36.png)
+
+15. 未送信のユーザー登録フォーム (図 7.12) のURLと、送信済みのユーザー登録フォーム (図 7.18) のURLを比べてみましょう。なぜURLは違っているのでしょうか? 考えてみてください。
+    - 未送信
+        - /signup
+    - 送信済み
+        - /users
+    - 新しいユーザーを作成するためのフォームを表示するアクションはnewアクション（GETリクエスト）であり、実際に作成するアクションはcreateアクション（POSTリクエスト）であるためURLが異なる
+
+16. リスト 7.20で実装したエラーメッセージに対するテストを書いてみてください。どのくらい細かくテストするかはお任せします。リスト 7.25にテンプレートを用意しておいたので、参考にしてください。
+    - ```
+        require 'test_helper'
+
+        class UsersSignupTest < ActionDispatch::IntegrationTest
+
+        test "invalid signup information" do
+            get signup_path
+            assert_no_difference 'User.count' do
+            post users_path, params: { user: { name:  "",
+                                                email: "user@invalid",
+                                                password:              "foo",
+                                                password_confirmation: "bar" } }
+            end
+            assert_template 'users/new'
+            assert_select 'div#<CSS id for error explanation>'
+            assert_select 'div.<CSS class for field with error>'
+        end
+
+        test "email should be valid format" do
+            get signup_path
+            assert_no_difference 'User.count' do
+            post users_path, params: { user: { name:  "Example User",
+                                                email: "user@invalid,com",
+                                                password:              "password123",
+                                                password_confirmation: "password123" } }
+            end
+            assert_template 'users/new'
+            assert_select 'div#error_explanation'
+            assert_select 'div.field_with_errors', text: "Email is invalid"
+        end
+
+        test "email should be valid format" do
+            get signup_path
+            assert_no_difference 'User.count' do
+            post users_path, params: { user: { name:  "Example User",
+                                                email: "user@invalid,com",
+                                                password:              "password123",
+                                                password_confirmation: "password123" } }
+            end
+            assert_template 'users/new'
+            assert_select 'div#error_explanation'
+            assert_select 'div.field_with_errors', text: "Email is invalid"
+        end
+
+        test "password should be at least 6 characters" do
+            get signup_path
+            assert_no_difference 'User.count' do
+            post users_path, params: { user: { name:  "Example User",
+                                                email: "user@example.com",
+                                                password:              "pass",
+                                                password_confirmation: "pass" } }
+            end
+            assert_template 'users/new'
+            assert_select 'div#error_explanation'
+            assert_select 'div.field_with_errors', text: "Password is too short (minimum is 6 characters)"
+        end
+        
+        end
+
+      ```
+
+17. ユーザー登録フォームのURLは /signup ですが、無効なユーザー登録データを送付するとURLが /users に変わってしまいます。これはリスト 5.43で追加した名前付きルート (/signup) と、RESTfulなルーティング (リスト 7.3) のデフォルト設定との差異によって生じた結果です。リスト 7.26とリスト 7.27の内容を参考に、この問題を解決してみてください。うまくいけばどちらのURLも /signup になるはずです。あれ、でもテストは greenのままになっていますね...、なぜでしょうか? (考えてみてください)
+    - テストがURLの変更を検知していないから
+18. リスト 7.25のpost部分を変更して、先ほどの演習課題で作った新しいURL (/signup) に合わせてみましょう。また、テストが greenのままになっている点も確認してください。
+    - ![](images/2023-10-25-14-15-36.png)
+19. リスト 7.27のフォームを以前の状態 (リスト 7.20) に戻してみて、テストがやはり greenになっていることを確認してください。これは問題です! なぜなら、現在postが送信されているURLは正しくないのですから。assert_selectを使ったテストをリスト 7.25に追加し、このバグを検知できるようにしてみましょう (テストを追加して redになれば成功です)。その後、変更後のフォーム (リスト 7.27) に戻してみて、テストが green になることを確認してみましょう。ヒント: フォームから送信してテストするのではなく、'form[action="/signup"]'という部分が存在するかどうかに着目してテストしてみましょう。
+    - ![](images/2023-10-25-14-31-01.png)
+
+20. 有効な情報を送信し、ユーザーが実際に作成されたことを、Railsコンソールを使って確認してみましょう。
+    - ![](images/2023-10-25-14-43-52.png)
+
+21. リスト 7.28を更新し、redirect_to user_url(@user)とredirect_to @userが同じ結果になることを確認してみましょう。
+    - ![](images/2023-10-25-14-43-17.png)
+
+22. コンソールに移り、文字列内の式展開 (4.2.2) でシンボルを呼び出してみましょう。例えば"#{:success}"といったコードを実行すると、どんな値が返ってきますか? 確認してみてください。
+    - ```
+        irb(main):009:0> puts "#{:success}"
+        success
+        => nil
+        irb(main):010:0> 
+      ```
+
+23. 先ほどの演習で試した結果を参考に、リスト 7.30のflashはどのような結果になるか考えてみてください。
+    - ```
+        irb(main):012:1* flash.each do |key, value|
+        irb(main):013:1*   puts "#{key}"
+        irb(main):014:1*   puts "#{value}"
+        irb(main):015:0> end
+        success
+        It worked!
+        danger
+        It failed.
+        => {:success=>"It worked!", :danger=>"It failed."}
+        irb(main):016:0> puts "#{:flash}"
+        flash
+        => nil
+      ```
+
+24. Railsコンソールを使って、新しいユーザーが本当に作成されたのかもう一度チェックしてみましょう。結果は、リスト 7.32のようになるはずです。
+    - ```
+        user = User.first
+        (1.0ms)  SET NAMES utf8,  @@SESSION.sql_mode = CONCAT(CONCAT(@@sql_mode, ',STRICT_ALL_TABLES'), ',NO_AUTO_VALUE_ON_ZERO'),  @@SESSION.sql_auto_is_null = 0, @@SESSION.wait_timeout = 2147483
+        User Load (0.9ms)  SELECT  `users`.* FROM `users` ORDER BY `users`.`id` ASC LIMIT 1
+        => #<User id: 1, name: "Rails Tutorial", email: "example@railstutorial.org", created_at: "2023-10-25 06:25:14", updated_at: "2023-10-25 06:25:...
+        irb(main):002:0> user
+        => #<User id: 1, name: "Rails Tutorial", email: "example@railstutorial.org", created_at: "2023-10-25 06:25:14", updated_at: "2023-10-25 06:25:14", password_digest: "$2a$10$e4699Wb1ouSEJrmJGQ4gXe/oIUS63s1jC8nLpCTlYOb...">
+      ``` 
+
+25. 自分のメールアドレスでユーザー登録を試してみましょう。既にGravatarに登録している場合、適切な画像が表示されているか確認してみてください。
+    - ![](images/2023-10-25-15-29-56.png)
+
+26. 7.4.2で実装したflashに対するテストを書いてみてください。どのくらい細かくテストするかはお任せします。リスト 7.34に最小限のテンプレートを用意しておいたので、参考にしてください (（コードを書き込む）の部分を適切なコードに置き換えると完成します)。ちなみに、テキストに対するテストは壊れやすいです。文量の少ないflashのキーであっても、それは同じです。筆者の場合、flashが空でないかをテストするだけの場合が多いです。
+    - ```
+        test "valid signup information" do
+            get signup_path
+            assert_difference 'User.count', 1 do
+            post users_path, params: { user: { name:  "Example User",
+                                                email: "user@example.com",
+                                                password:              "password",
+                                                password_confirmation: "password" } }
+            end
+            follow_redirect!
+            assert_template 'users/show'
+            assert_not flash.empty?
+        end
+      ```
+
+27. 本文中でも指摘しましたが、flash用のHTML (リスト 7.31) は読みにくいです。より読みやすくしたリスト 7.35のコードに変更してみましょう。変更が終わったらテストスイートを実行し、正常に動作することを確認してください。なお、このコードでは、Railsのcontent_tagというヘルパーを使っています。
+    - ![](images/2023-10-25-15-52-26.png)
+
+28. リスト 7.28のリダイレクトの行をコメントアウトすると、テストが失敗することを確認してみましょう。
+    - ![](images/2023-10-25-15-57-37.png)
+
+29. リスト 7.28で、@user.saveの部分をfalseに置き換えたとしましょう (バグを埋め込んでしまったと仮定してください)。このとき、assert_differenceのテストではどのようにしてこのバグを検知するでしょうか? テストコードを追って考えてみてください。
+    - @user.saveをfalseに置き換えると、ユーザーは保存されない。User.countが増加しないため、assert_differenceの期待値と実際の値が一致しないことになり、バグを検知する
+
+30. ブラウザから本番環境 (Heroku) にアクセスし、SSLの鍵マークがかかっているか、URLがhttpsになっているかどうかを確認してみましょう。
+    - Herokuを使わないので飛ばす
+31. 本番環境でユーザーを作成してみましょう。Gravatarの画像は正しく表示されているでしょうか?
+    - Herokuを使わないので飛ばす
+
+
