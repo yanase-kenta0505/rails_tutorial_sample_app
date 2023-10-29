@@ -773,3 +773,24 @@
         奇数
         => nil
       ```
+
+11. リスト 9.25の統合テストでは、仮想のremember_token属性にアクセスできないと説明しましたが、実は、assignsという特殊なテストメソッドを使うとアクセスできるようになります。コントローラで定義したインスタンス変数にテストの内部からアクセスするには、テスト内部でassignsメソッドを使います。このメソッドにはインスタンス変数に対応するシンボルを渡します。例えばcreateアクションで@userというインスタンス変数が定義されていれば、テスト内部ではassigns(:user)と書くことでインスタンス変数にアクセスできます。本チュートリアルのアプリケーションの場合、Sessionsコントローラのcreateアクションでは、userを (インスタンス変数ではない) 通常のローカル変数として定義しましたが、これをインスタンス変数に変えてしまえば、cookiesにユーザーの記憶トークンが正しく含まれているかどうかをテストできるようになります。このアイデアに従ってリスト 9.27とリスト 9.28の不足分を埋め (ヒントとして?や（コードを書き込む）を目印に置いてあります)、[remember me] チェックボックスのテストを改良してみてください。
+    - ```rb
+          def create
+            @user = User.find_by(email: params[:session][:email].downcase)
+            if @user && @user.authenticate(params[:session][:password])
+            log_in @user
+            params[:session][:remember_me] == '1' ? remember(@user) : forget(@user)
+            redirect_to @user
+            else
+            flash.now[:danger] = 'Invalid email/password combination'
+            render 'new'
+            end
+        end
+      ```
+      ```rb
+        test "login with remembering" do
+            log_in_as(@user, remember_me: '1')
+            assert_equal cookies['remember_token'], assigns(:user).remember_token
+        end
+      ```
