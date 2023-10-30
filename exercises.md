@@ -851,3 +851,45 @@
     - 編集は成功しました。
 6. もしGravatarと紐付いていない適当なメールアドレス (foobar@example.comなど) に変更した場合、プロフィール画像はどのように表示されるでしょうか? 実際に編集フォームからメールアドレスを変更して、確認してみましょう。
     - ![](images/2023-10-30-13-58-39.png)
+
+7. デフォルトのbeforeフィルターは、すべてのアクションに対して制限を加えます。今回のケースだと、ログインページやユーザー登録ページにも制限の範囲が及んでしまうはずです (結果としてテストも失敗するはずです)。リスト 10.15のonly:オプションをコメントアウトしてみて、テストスイートがそのエラーを検知できるかどうか (テストが失敗するかどうか) 確かめてみましょう。
+    - ```sh
+        rails test
+        Started with run options --seed 50598
+
+        FAIL["test_should_get_new", UsersControllerTest, 0.3055729998741299]
+        test_should_get_new#UsersControllerTest (0.31s)
+                Expected response to be a <2XX: success>, but was a <302: Found> redirect to <http://www.example.com/login>
+                Response body: <html><body>You are being <a href="http://www.example.com/login">redirected</a>.</body></html>
+                test/controllers/users_controller_test.rb:10:in `block in <class:UsersControllerTest>'
+
+        FAIL["test_layout_links", SiteLayoutTest, 0.38484900002367795]
+        test_layout_links#SiteLayoutTest (0.38s)
+                Expected at least 1 element matching "title", found 0.
+                Expected 0 to be >= 1.
+                test/integration/site_layout_test.rb:15:in `block in <class:SiteLayoutTest>'
+
+        FAIL["test_invalid_signup_information", UsersSignupTest, 0.3901680000126362]
+        test_invalid_signup_information#UsersSignupTest (0.39s)
+                expecting <"users/new"> but rendering with <[]>
+                test/integration/users_signup_test.rb:13:in `block in <class:UsersSignupTest>'
+
+        FAIL["test_valid_signup_information", UsersSignupTest, 0.3955779999960214]
+        test_valid_signup_information#UsersSignupTest (0.40s)
+                "User.count" didn't change by 1.
+                Expected: 2
+                Actual: 1
+                test/integration/users_signup_test.rb:31:in `block in <class:UsersSignupTest>'
+
+        FAIL["test_valid_signup_information_with_assert_select", UsersSignupTest, 0.40041100000962615]
+        test_valid_signup_information_with_assert_select#UsersSignupTest (0.40s)
+                "User.count" didn't change by 1.
+                Expected: 2
+                Actual: 1
+                test/integration/users_signup_test.rb:18:in `block in <class:UsersSignupTest>'
+
+        34/34: [====================================================================] 100% Time: 00:00:00, Time: 00:00:00
+
+        Finished in 0.40061s
+        34 tests, 85 assertions, 5 failures, 0 errors, 0 skips
+      ```
