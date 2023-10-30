@@ -902,4 +902,27 @@
     - edit
         - URLを直接入力すれば編集ページへアクセスできるから
 
-10. 
+10. フレンドリーフォワーディングで、渡されたURLに初回のみ転送されていることを、テストを書いて確認してみましょう。次回以降のログインのときには、転送先のURLはデフォルト (プロフィール画面) に戻っている必要があります。ヒント: リスト 10.29のsession[:forwarding_url]が正しい値かどうか確認するテストを追加してみましょう。
+    - ```rb
+        test "friendly forwarding, forwarded only the first time to the URL passed" do
+            get edit_user_path(@user)
+            log_in_as(@user)
+            assert_redirected_to edit_user_url(@user)
+            follow_redirect!
+            assert_template 'users/edit'
+            
+            # ログアウトして再度ログイン
+            delete logout_path
+            log_in_as(@user)
+            assert_redirected_to @user
+            follow_redirect!
+            assert_template 'users/show'
+        end
+      ```
+11. 7.1.3で紹介したdebuggerメソッドをSessionsコントローラのnewアクションに置いてみましょう。その後、ログアウトして /users/1/edit にアクセスしてみてください (デバッガーが途中で処理を止めるはずです)。ここでコンソールに移り、session[:forwarding_url]の値が正しいかどうか確認してみましょう。また、newアクションにアクセスしたときのrequest.get?の値も確認してみましょう (デバッガーを使っていると、ときどき予期せぬ箇所でターミナルが止まったり、おかしい挙動を見せたりします。熟練の開発者になった気になって (コラム 1.2)、落ち着いて対処してみましょう)。
+    - ```sh
+        (byebug) session[:forwarding_url]
+        "http://localhost:3000/users/1/edit"
+        (byebug) request.get?
+        true
+      ```
