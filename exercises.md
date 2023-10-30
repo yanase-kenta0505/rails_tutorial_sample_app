@@ -794,3 +794,19 @@
             assert_equal cookies['remember_token'], assigns(:user).remember_token
         end
       ```
+
+12. リスト 9.33にあるauthenticated?の式を削除すると、リスト 9.31の２つ目のテストで失敗することを確かめてみましょう (このテストが正しい対象をテストしていることを確認してみましょう)。
+    - ```sh
+        rails test
+        Started with run options --seed 60300
+
+        FAIL["test_current_user_returns_nil_when_remember_digest_is_wrong", SessionsHelperTest, 0.3166760001331568]
+        test_current_user_returns_nil_when_remember_digest_is_wrong#SessionsHelperTest (0.32s)
+                Expected #<User id: 762146111, name: "Michael Example", email: "michael@example.com", created_at: "2023-10-30 01:55:23", updated_at: "2023-10-30 01:55:23", password_digest: "$2a$04$P8t6M.ooSmPrXVnOVY7mDuK9eB7DZwUs1Y4v4pcsjGA...", remember_digest: "$2a$04$92T25WRb4x6.ssnA6XXB1uOb0NK6qTqo.pvxP3O6WJe..."> to be nil.
+                test/helpers/sessions_helper_test.rb:17:in `block in <class:SessionsHelperTest>'
+
+        30/30: [====================================================================] 100% Time: 00:00:00, Time: 00:00:00
+
+        Finished in 0.36492s
+        30 tests, 76 assertions, 1 failures, 0 errors, 0 skips
+      ```
