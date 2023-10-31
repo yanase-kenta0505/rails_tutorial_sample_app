@@ -1068,3 +1068,20 @@
         Finished in 0.80902s
         44 tests, 180 assertions, 1 failures, 0 errors, 0 skips
       ```
+
+#　第11章
+## チェックシート
+## 演習
+1. 現時点でテストスイートを実行すると greenになることを確認してみましょう。
+    - ```sh
+        claves@clavesnoMacBook-Air sample_app % rails test
+        Started with run options --seed 6492
+
+        44/44: [===============================================================================================] 100% Time: 00:00:00, Time: 00:00:00
+
+        Finished in 0.88069s
+        44 tests, 181 assertions, 0 failures, 0 errors, 0 skips
+      ```
+2. 表 11.2の名前付きルートでは、_pathではなく_urlを使うように記してあります。なぜでしょうか? 考えてみましょう。ヒント: 私達はこれからメールで名前付きルートを使います。
+    - メール内でリンクを使用する際はフルURLを使用する必要があるため
+    - _pathは相対パスになってしまいリンクが正しく機能しない
