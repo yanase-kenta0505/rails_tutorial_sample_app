@@ -1003,3 +1003,21 @@
             end
         end
         ```
+
+18. リスト 10.52にあるrenderの行をコメントアウトし、テストの結果が redに変わることを確認してみましょう。
+    - ```sh
+        rails test
+        Started with run options --seed 38576
+
+        FAIL["test_index_including_pagination", UsersIndexTest, 0.6258310000412166]
+        test_index_including_pagination#UsersIndexTest (0.63s)
+                Expected at least 1 element matching "a[href=\"/users/14035331\"]", found 0.
+                Expected 0 to be >= 1.
+                test/integration/users_index_test.rb:15:in `block (2 levels) in <class:UsersIndexTest>'
+                test/integration/users_index_test.rb:14:in `block in <class:UsersIndexTest>'
+
+        40/40: [======================================================================] 100% Time: 00:00:00, Time: 00:00:00
+
+        Finished in 0.84203s
+        40 tests, 115 assertions, 1 failures, 0 errors, 0 skips
+      ```
