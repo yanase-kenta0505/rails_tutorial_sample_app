@@ -926,3 +926,6 @@
         (byebug) request.get?
         true
       ```
+
+12. レイアウトにあるすべてのリンクに対して統合テストを書いてみましょう。ログイン済みユーザーとそうでないユーザーのそれぞれに対して、正しい振る舞いを考えてください。ヒント: log_in_asヘルパーを使ってリスト 5.32にテストを追加してみましょう。
+    - https://github.com/yanase-kenta0505/rails_tutorial_sample_app/commit/a64307b9d33586a85ca3dce539bc423bfea8becb
