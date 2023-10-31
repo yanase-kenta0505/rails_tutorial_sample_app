@@ -946,16 +946,60 @@
         irb(main):014:0> 
       ```
 15. 先ほどの演習課題で取得したpaginationオブジェクトは、何クラスでしょうか? また、User.allのクラスとどこが違うでしょうか? 比較してみてください。
+    - ActiveRecord_Relation
+    - paginationオブジェクトはページネーションに関連する追加メソッドを使用することができる
+
+16. 試しにリスト 10.45にあるページネーションのリンク (will_paginateの部分) を２つともコメントアウトしてみて、リスト 10.48のテストが redに変わるかどうか確かめてみましょう。
+17. 先ほどは２つともコメントアウトしましたが、１つだけコメントアウトした場合、テストが greenのままであることを確認してみましょう。will_paginateのリンクが２つとも存在していることをテストしたい場合は、どのようなテストを追加すれば良いでしょうか? ヒント: 表 5.2を参考にして、数をカウントするテストを追加してみましょう。
     - ```sh
-        irb(main):001:0> user = User.paginate(page: nil)
-        (0.7ms)  SET NAMES utf8,  @@SESSION.sql_mode = CONCAT(CONCAT(@@sql_mode, ',STRICT_ALL_TABLES'), ',NO_AUTO_VALUE_ON_ZERO'),  @@SESSION.sql_auto_is_null = 0, @@SESSION.wait_timeout = 2147483
-        User Load (1.4ms)  SELECT  `users`.* FROM `users` LIMIT 11 OFFSET 0
-        (0.9ms)  SELECT COUNT(*) FROM `users`
-        => #<ActiveRecord::Relation [#<User id: 1, name: "Example User", email: "example@railstutorial.org", cr...
-        irb(main):002:0> user.class
-        => User::ActiveRecord_Relation
-        irb(main):003:0> User.all.class
-        => User::ActiveRecord_Relation
+        rails test
+            Started with run options --seed 2383
+
+            FAIL["test_index_including_pagination", UsersIndexTest, 0.43116199993528426]
+            test_index_including_pagination#UsersIndexTest (0.43s)
+                    Expected at least 1 element matching "div.pagination", found 0.
+                    Expected 0 to be >= 1.
+                    test/integration/users_index_test.rb:13:in `block in <class:UsersIndexTest>'
+
+            40/40: [===================================================================================================================================] 100% Time: 00:00:00, Time: 00:00:00
+
+            Finished in 0.74546s
+            40 tests, 114 assertions, 1 failures, 0 errors, 0 skips
+
+            claves@clavesnoMacBook-Air sample_app % k
+            zsh: command not found: k
+            claves@clavesnoMacBook-Air sample_app % rails test
+            Started with run options --seed 35961
+
+            40/40: [===================================================================================================================================] 100% Time: 00:00:00, Time: 00:00:00
+
+            Finished in 0.67100s
+            40 tests, 144 assertions, 0 failures, 0 errors, 0 skips
+
+            claves@clavesnoMacBook-Air sample_app % rails test
+            Started with run options --seed 3497
+
+            FAIL["test_index_including_pagination", UsersIndexTest, 0.6241939999163151]
+            test_index_including_pagination#UsersIndexTest (0.62s)
+                    Expected exactly 2 elements matching "div.pagination", found 1.
+                    Expected: 2
+                    Actual: 1
+                    test/integration/users_index_test.rb:13:in `block in <class:UsersIndexTest>'
+
+            40/40: [===============================================================================================] 100% Time: 00:00:00, Time: 00:00:00
+
+            Finished in 0.87755s
+            40 tests, 114 assertions, 1 failures, 0 errors, 0 skips
       ```
 
-    - 通常はWillPaginate::Collectionになるようだがならなかった
+      - ```
+        test "index including pagination" do
+            log_in_as(@user)
+            get users_path
+            assert_template 'users/index'
+            assert_select 'div.pagination', count: 2
+            User.paginate(page: 1).each do |user|
+            assert_select 'a[href=?]', user_path(user), text: user.name
+            end
+        end
+        ```
