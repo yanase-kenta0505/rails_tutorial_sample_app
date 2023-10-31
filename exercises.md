@@ -1024,3 +1024,18 @@
 
 19. Web経由でadmin属性を変更できないことを確認してみましょう。具体的には、リスト 10.56に示したように、PATCHを直接ユーザーのURL (/users/:id) に送信するテストを作成してみてください。テストが正しい振る舞いをしているかどうか確信を得るために、まずはadminをuser_paramsメソッド内の許可されたパラメータ一覧に追加するところから始めてみましょう。最初のテストの結果は redになるはずです。
     - 確認しました。
+
+20. 管理者ユーザーとしてログインし、試しにサンプルユーザを２〜３人削除してみましょう。ユーザーを削除すると、Railsサーバーのログにはどのような情報が表示されるでしょうか?
+    - ```sh
+        Started DELETE "/users/2" for 192.168.65.1 at 2023-10-31 08:55:21 +0000
+        sample_app-web-1  | Cannot render console from 192.168.65.1! Allowed networks: 127.0.0.1, ::1, 127.0.0.0/127.255.255.255
+        sample_app-web-1  | Processing by UsersController#destroy as HTML
+        sample_app-web-1  |   Parameters: {"authenticity_token"=>"pc/KtKVH/UFrSVnplSiUNM1NpLKg3A0d7os2bDKHEnizc1aj493Vz6874RZ7Ba5LwjqwLnB7t2lZg2icSZKIjw==", "id"=>"2"}
+        sample_app-web-1  |   User Load (1.6ms)  SELECT  `users`.* FROM `users` WHERE `users`.`id` = 1 LIMIT 1
+        sample_app-web-1  |   User Load (1.1ms)  SELECT  `users`.* FROM `users` WHERE `users`.`id` = 2 LIMIT 1
+        sample_app-web-1  |    (0.3ms)  BEGIN
+        sample_app-web-1  |   SQL (1.8ms)  DELETE FROM `users` WHERE `users`.`id` = 2
+        sample_app-web-1  |    (2.5ms)  COMMIT
+        sample_app-web-1  | Redirected to http://localhost:3000/users
+        sample_app-web-1  | Completed 302 Found in 13ms (ActiveRecord: 7.3ms)
+      ```
