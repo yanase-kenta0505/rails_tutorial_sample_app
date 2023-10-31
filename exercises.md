@@ -701,3 +701,123 @@
 
 17. cookiesの内容を調べてみて、ログアウト後にはsessionが正常に削除されていることを確認してみましょう。
     - 確認しました。
+
+
+# 第9章
+## チェックシート
+1. cookiesの情報を盗み出す代表的な方法には、どのようなものがあるでしょうか？
+    - ネットワークスニッフィング
+    - セッションハイジャック
+    - クロスサイトスクリプティング 
+2. cookiesの情報を盗み出す代表的な方法の対策は、どのようなものがあるでしょうか？
+    - SSLをサイト全体に適用し、ネットワークデータを暗号化で保護する
+    - 記憶トークンをそのままデータベースに保存するのではなく、記憶トークンのハッシュ値を保存するようにする
+3. Railsチュートリアルで作成しているアプリケーションでは、cookiesが盗まれるとどのようなリスクが発生するでしょうか？
+    - セッションハイジャック
+    - 個人情報の漏洩
+    - アカウントの不正利用 
+## 演習
+1. コンソールを開き、データベースにある最初のユーザーを変数userに代入してください。その後、そのuserオブジェクトからrememberメソッドがうまく動くかどうか確認してみましょう。また、remember_tokenとremember_digestの違いも確認してみてください。
+    - ```sh
+        irb(main):001:0> user = User.first
+        (0.8ms)  SET NAMES utf8,  @@SESSION.sql_mode = CONCAT(CONCAT(@@sql_mode, ',STRICT_ALL_TABLES'), ',NO_AUTO_VALUE_ON_ZERO'),  @@SESSION.sql_auto_is_null = 0, @@SESSION.wait_timeout = 2147483
+        User Load (0.5ms)  SELECT  `users`.* FROM `users` ORDER BY `users`.`id` ASC LIMIT 1
+        => #<User id: 1, name: "Rails Tutorial", email: "example@railstutorial.org", created_at: "2023-10-25 06:25:14", updated_at: "2023-1...
+        irb(main):002:0> user.remember
+        (1.7ms)  BEGIN
+        SQL (21.6ms)  UPDATE `users` SET `updated_at` = '2023-10-26 09:36:14', `remember_digest` = '$2a$10$uRoubNJ2vJfIdC/.q4ASe.C6ROropjuLsIqLpo/qRP0msEzJKtkJu' WHERE `users`.`id` = 1
+        (2.4ms)  COMMIT
+        => true
+        irb(main):003:0> user.remember_token
+        => "COU4iSpUNRS8092sLflDKw"
+        irb(main):004:0> user.remember_digest
+        => "$2a$10$uRoubNJ2vJfIdC/.q4ASe.C6ROropjuLsIqLpo/qRP0msEzJKtkJu"
+        irb(main):005:0> 
+      ```
+    - remember_tokenは平文のトークン、remember_digestはハッシュ化されたダイジェスト
+
+2. リスト 9.3では、明示的にUserクラスを呼び出すことで、新しいトークンやダイジェスト用のクラスメソッドを定義しました。実際、User.new_tokenやUser.digestを使って呼び出せるようになったので、おそらく最も明確なクラスメソッドの定義方法であると言えるでしょう。しかし実は、より「Ruby的に正しい」クラスメソッドの定義方法が２通りあります。1つはややわかりにくく、もう1つは非常に混乱するでしょう。テストスイートを実行して、ややわかりにくいリスト 9.4の実装でも、非常に混乱しやすいリスト 9.5の実装でも、いずれも正しく動くことを確認してみてください。ヒント: selfは、通常の文脈ではUser「モデル」、つまりユーザーオブジェクトのインスタンスを指しますが、リスト 9.4やリスト 9.5の文脈では、selfはUser「クラス」を指すことにご注意ください。わかりにくさの原因の一部はこの点にあります。
+    - ```sh
+        claves@clavesnoMacBook-Air sample_app % rails test
+
+        Started with run options --seed 43093
+
+        25/25: [=========================================================================================] 100% Time: 00:00:00, Time: 00:00:00
+
+        Finished in 0.33003s
+        25 tests, 69 assertions, 0 failures, 0 errors, 0 skips
+      ```
+
+3. ブラウザのcookieを調べ、ログイン後のブラウザではremember_tokenと暗号化されたuser_idがあることを確認してみましょう。
+    - 確認しました
+
+4. コンソールを開き、リスト 9.6のauthenticated?メソッドがうまく動くかどうか確かめてみましょう。
+    - ```sh
+        irb(main):002:0> user = User.first
+        (1.0ms)  SET NAMES utf8,  @@SESSION.sql_mode = CONCAT(CONCAT(@@sql_mode, ',STRICT_ALL_TABLES'), ',NO_AUTO_VALUE_ON_ZERO'),  @@SESSION.sql_auto_is_null = 0, @@SESSION.wait_timeout = 2147483
+        User Load (1.1ms)  SELECT  `users`.* FROM `users` ORDER BY `users`.`id` ASC LIMIT 1
+        => #<User id: 1, name: "Rails Tutorial", email: "example@railstutorial.org", created_at: "2023-10-26 22:01...
+        irb(main):003:0> user.authenticated?('5HYs7lmjd3U1QBm760UEMA')
+        => true
+      ```
+
+5. ログアウトした後に、ブラウザの対応するcookiesが削除されていることを確認してみましょう。
+   - 確認しました
+
+6. リスト 9.16で修正した行をコメントアウトし、２つのログイン済みのタブによるバグを実際に確かめてみましょう。まず片方のタブでログアウトし、その後、もう１つのタブで再度ログアウトを試してみてください。
+    - エラーが発生する
+7. リスト 9.19で修正した行をコメントアウトし、２つのログイン済みのブラウザによるバグを実際に確かめてみましょう。まず片方のブラウザでログアウトし、もう一方のブラウザを再起動してサンプルアプリケーションにアクセスしてみてください。
+    - エラーが発生する
+8. 上のコードでコメントアウトした部分を元に戻し、テストスイートが red から greenになることを確認しましょう。
+    - ![](images/2023-10-27-8-06-07.png)
+
+9. ブラウザでcookies情報を調べ、[remember me] をチェックしたときに意図した結果になっているかどうかを確認してみましょう。
+    - remember_tokenなどが設定されていることが確認できました
+    - ブラウザを再起動してもログイン状態が保たれます
+10. コンソールを開き、三項演算子を使った実例を考えてみてください (コラム 9.2)。
+    - ```sh
+        irb(main):001:0> number = 5
+        => 5
+        irb(main):002:0> result = number.even? ? "偶数" : "奇数"
+        => "奇数"
+        irb(main):003:0> puts result
+        奇数
+        => nil
+      ```
+
+11. リスト 9.25の統合テストでは、仮想のremember_token属性にアクセスできないと説明しましたが、実は、assignsという特殊なテストメソッドを使うとアクセスできるようになります。コントローラで定義したインスタンス変数にテストの内部からアクセスするには、テスト内部でassignsメソッドを使います。このメソッドにはインスタンス変数に対応するシンボルを渡します。例えばcreateアクションで@userというインスタンス変数が定義されていれば、テスト内部ではassigns(:user)と書くことでインスタンス変数にアクセスできます。本チュートリアルのアプリケーションの場合、Sessionsコントローラのcreateアクションでは、userを (インスタンス変数ではない) 通常のローカル変数として定義しましたが、これをインスタンス変数に変えてしまえば、cookiesにユーザーの記憶トークンが正しく含まれているかどうかをテストできるようになります。このアイデアに従ってリスト 9.27とリスト 9.28の不足分を埋め (ヒントとして?や（コードを書き込む）を目印に置いてあります)、[remember me] チェックボックスのテストを改良してみてください。
+    - ```rb
+          def create
+            @user = User.find_by(email: params[:session][:email].downcase)
+            if @user && @user.authenticate(params[:session][:password])
+            log_in @user
+            params[:session][:remember_me] == '1' ? remember(@user) : forget(@user)
+            redirect_to @user
+            else
+            flash.now[:danger] = 'Invalid email/password combination'
+            render 'new'
+            end
+        end
+      ```
+      ```rb
+        test "login with remembering" do
+            log_in_as(@user, remember_me: '1')
+            assert_equal cookies['remember_token'], assigns(:user).remember_token
+        end
+      ```
+
+12. リスト 9.33にあるauthenticated?の式を削除すると、リスト 9.31の２つ目のテストで失敗することを確かめてみましょう (このテストが正しい対象をテストしていることを確認してみましょう)。
+    - ```sh
+        rails test
+        Started with run options --seed 60300
+
+        FAIL["test_current_user_returns_nil_when_remember_digest_is_wrong", SessionsHelperTest, 0.3166760001331568]
+        test_current_user_returns_nil_when_remember_digest_is_wrong#SessionsHelperTest (0.32s)
+                Expected #<User id: 762146111, name: "Michael Example", email: "michael@example.com", created_at: "2023-10-30 01:55:23", updated_at: "2023-10-30 01:55:23", password_digest: "$2a$04$P8t6M.ooSmPrXVnOVY7mDuK9eB7DZwUs1Y4v4pcsjGA...", remember_digest: "$2a$04$92T25WRb4x6.ssnA6XXB1uOb0NK6qTqo.pvxP3O6WJe..."> to be nil.
+                test/helpers/sessions_helper_test.rb:17:in `block in <class:SessionsHelperTest>'
+
+        30/30: [====================================================================] 100% Time: 00:00:00, Time: 00:00:00
+
+        Finished in 0.36492s
+        30 tests, 76 assertions, 1 failures, 0 errors, 0 skips
+      ```
