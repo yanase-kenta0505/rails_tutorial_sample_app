@@ -1039,3 +1039,21 @@
         sample_app-web-1  | Redirected to http://localhost:3000/users
         sample_app-web-1  | Completed 302 Found in 13ms (ActiveRecord: 7.3ms)
       ```
+
+21. 試しにリスト 10.59にある管理者ユーザーのbeforeフィルターをコメントアウトしてみて、テストの結果が redに変わることを確認してみましょう。
+    - ```sh
+        rails test
+        Started with run options --seed 20027
+
+        FAIL["test_should_redirect_destroy_when_logged_in_as_a_non-admin", UsersControllerTest, 0.37505499995313585]
+        test_should_redirect_destroy_when_logged_in_as_a_non-admin#UsersControllerTest (0.38s)
+                "User.count" didn't change by 0.
+                Expected: 34
+                Actual: 33
+                test/controllers/users_controller_test.rb:66:in `block in <class:UsersControllerTest>'
+
+        44/44: [======================================================================] 100% Time: 00:00:00, Time: 00:00:00
+
+        Finished in 0.80902s
+        44 tests, 180 assertions, 1 failures, 0 errors, 0 skips
+      ```
