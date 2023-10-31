@@ -932,3 +932,30 @@
 
 13. 試しに他人の編集ページにアクセスしてみて、10.2.2で実装したようにリダイレクトされるかどうかを確かめてみましょう。
     - 確認しました。
+
+14. Railsコンソールを開き、pageオプションにnilをセットして実行すると、１ページ目のユーザーが取得できることを確認してみましょう。
+    - ```sh
+        irb(main):008:0> user = User.paginate(page: nil)
+        User Load (6.8ms)  SELECT  `users`.* FROM `users` LIMIT 11 OFFSET 0
+        (3.5ms)  SELECT COUNT(*) FROM `users`
+        => #<ActiveRecord::Relation [#<User id: 1, name: "Example User", email: "example@railstutorial.org", cr...
+        irb(main):013:0> user
+        User Load (5.5ms)  SELECT  `users`.* FROM `users` LIMIT 11 OFFSET 0
+        (1.9ms)  SELECT COUNT(*) FROM `users`
+        => #<ActiveRecord::Relation [#<User id: 1, name: "Example User", email: "example@railstutorial.org", created_at: "2023-10-31 01:10:46", updated_at: "2023-10-31 01:10:46", password_digest: "$2a$10$oX3r/xUvfLQb9.WngNcE0eeY04pChiqCbok93A.WX41...", remember_digest: nil>, #<User id: 2, name: "Zachery Daniel", email: "example-1@railstutorial.org", created_at: "2023-10-31 01:10:47", updated_at: "2023-10-31 01:10:47", password_digest: "$2a$10$m00PVq15/H5mDjz5dxZWmOVucf8TyrnqyxjYyuQWyXH...", remember_digest: nil>, #<User id: 3, name: "Elbert McCullough", email: "example-2@railstutorial.org", created_at: "2023-10-31 01:10:47", updated_at: "2023-10-31 01:10:47", password_digest: "$2a$10$dJLtQH9P5HygowJEpQdM6.f9ZCOtJs0E3podpvXsrP4...", remember_digest: nil>, #<User id: 4, name: "Horace Jaskolski", email: "example-3@railstutorial.org", created_at: "2023-10-31 01:10:47", updated_at: "2023-10-31 01:10:47", password_digest: "$2a$10$Y2YCwP6tXbfkXJEJYY5md.zqON4TvmCKkxa4x9nfJ7A...", remember_digest: nil>, #<User id: 5, name: "Jose Emmerich", email: "example-4@railstutorial.org", created_at: "2023-10-31 01:10:47", updated_at: "2023-10-31 01:10:47", password_digest: "$2a$10$FD6BcwhV7nJkJGLGUvZbDuHAGiSnt4iHA4a5pj0aMu3...", remember_digest: nil>, #<User id: 6, name: "Nick Huel", email: "example-5@railstutorial.org", created_at: "2023-10-31 01:10:47", updated_at: "2023-10-31 01:10:47", password_digest: "$2a$10$AVYrG5Oq2FanxC9iPXeZC.ExSvWdR/9/jnUC9LDcHdE...", remember_digest: nil>, #<User id: 7, name: "Federico Abernathy", email: "example-6@railstutorial.org", created_at: "2023-10-31 01:10:47", updated_at: "2023-10-31 01:10:47", password_digest: "$2a$10$MqfFQNI/Nv3UL0IaJqeOI.77F7gWAk2/uPbQmVt12bS...", remember_digest: nil>, #<User id: 8, name: "Bert Waelchi", email: "example-7@railstutorial.org", created_at: "2023-10-31 01:10:47", updated_at: "2023-10-31 01:10:47", password_digest: "$2a$10$l8valFjY07soVJeCkmW8U.pN5XQbDMNqpcH.igr2rPs...", remember_digest: nil>, #<User id: 9, name: "Janice Cummerata IV", email: "example-8@railstutorial.org", created_at: "2023-10-31 01:10:47", updated_at: "2023-10-31 01:10:47", password_digest: "$2a$10$yhGBPeY6ncu1wUHmlDzEvOnCNW0zTWqKlP4ZUOsFULJ...", remember_digest: nil>, #<User id: 10, name: "Kelli Hartmann", email: "example-9@railstutorial.org", created_at: "2023-10-31 01:10:47", updated_at: "2023-10-31 01:10:47", password_digest: "$2a$10$X9qzRP7/AagF/J4OP9y67Ok2CX9q.CxdBP6mCOUQWNC...", remember_digest: nil>, ...]>
+        irb(main):014:0> 
+      ```
+15. 先ほどの演習課題で取得したpaginationオブジェクトは、何クラスでしょうか? また、User.allのクラスとどこが違うでしょうか? 比較してみてください。
+    - ```sh
+        irb(main):001:0> user = User.paginate(page: nil)
+        (0.7ms)  SET NAMES utf8,  @@SESSION.sql_mode = CONCAT(CONCAT(@@sql_mode, ',STRICT_ALL_TABLES'), ',NO_AUTO_VALUE_ON_ZERO'),  @@SESSION.sql_auto_is_null = 0, @@SESSION.wait_timeout = 2147483
+        User Load (1.4ms)  SELECT  `users`.* FROM `users` LIMIT 11 OFFSET 0
+        (0.9ms)  SELECT COUNT(*) FROM `users`
+        => #<ActiveRecord::Relation [#<User id: 1, name: "Example User", email: "example@railstutorial.org", cr...
+        irb(main):002:0> user.class
+        => User::ActiveRecord_Relation
+        irb(main):003:0> User.all.class
+        => User::ActiveRecord_Relation
+      ```
+
+    - 通常はWillPaginate::Collectionになるようだがならなかった
