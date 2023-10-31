@@ -1085,3 +1085,27 @@
 2. 表 11.2の名前付きルートでは、_pathではなく_urlを使うように記してあります。なぜでしょうか? 考えてみましょう。ヒント: 私達はこれからメールで名前付きルートを使います。
     - メール内でリンクを使用する際はフルURLを使用する必要があるため
     - _pathは相対パスになってしまいリンクが正しく機能しない
+
+3. 本項での変更を加えた後、テストスイートが green のままになっていることを確認してみましょう。
+    - 確認しました。
+4. コンソールからUserクラスのインスタンスを生成し、そのオブジェクトからcreate_activation_digestメソッドを呼び出そうとすると (Privateメソッドなので) NoMethodErrorが発生することを確認してみましょう。また、そのUserオブジェクトからダイジェストの値も確認してみましょう。
+    - ```sh
+        irb(main):004:0> user = User.first
+        User Load (10.9ms)  SELECT  `users`.* FROM `users` ORDER BY `users`.`id` ASC LIMIT 1
+        => #<User id: 1, name: "Example User", email: "example@railstutorial.org", created_at: "2023-10-31 05:40:33", updated_at: "2023-10-31 05:...
+        irb(main):005:0> user.create_activation_digest
+        Traceback (most recent call last):
+                1: from (irb):5
+        NoMethodError (private method `create_activation_digest' called for #<User:0x0000000104dfd978>)
+        Did you mean?  restore_activation_digest!
+        irb(main):006:0> user.activation_digest
+        => "$2a$10$at.5l6Ytb/D1zDlmP7MKreZs6cn9bHiyPekea3OX07ft.pMZ1Hb.6"
+      ```
+5. リスト 6.34で、メールアドレスの小文字化にはemail.downcase!という (代入せずに済む) メソッドがあることを知りました。このメソッドを使って、リスト 11.3のdowncase_emailメソッドを改良してみてください。また、うまく変更できれば、テストスイートは成功したままになっていることも確認してみてください。
+    - ```rb
+        def downcase_email
+            email.downcase!
+        end
+      ```
+
+    - テストが成功することを確認しました
