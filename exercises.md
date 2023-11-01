@@ -1217,3 +1217,19 @@
 
 3. リスト 12.4のform_forメソッドでは、なぜ@password_resetではなく:password_resetを使っているのでしょうか? 考えてみてください。
     - シンボルを使用する方法は、特定のモデルオブジェクトに紐づかないアクションを実行する場合に適しているから
+
+4. 試しに有効なメールアドレスをフォームから送信してみましょう (図 12.6)。どんなエラーメッセージが表示されたでしょうか?
+    - ![](images/2023-11-01-15-03-39.png)
+5. コンソールに移り、先ほどの演習課題で送信した結果、(エラーと表示されてはいるものの) 該当するuserオブジェクトにはreset_digestとreset_sent_atがあることを確認してみましょう。また、それぞれの値はどのようになっていますか?
+    - ```rb
+        claves@clavesnoMacBook-Air sample_app % rails c
+        Loading development environment (Rails 5.1.6)
+        irb(main):001:0> user = User.find_by(email: "example@railstutorial.org")
+        (1.0ms)  SET NAMES utf8,  @@SESSION.sql_mode = CONCAT(CONCAT(@@sql_mode, ',STRICT_ALL_TABLES'), ',NO_AUTO_VALUE_ON_ZERO'),  @@SESSION.sql_auto_is_null = 0, @@SESSION.wait_timeout = 2147483
+        User Load (1.3ms)  SELECT  `users`.* FROM `users` WHERE `users`.`email` = 'example@railstutorial.org' LIMIT 1
+        => #<User id: 1, name: "Example User", email: "example@railstutorial.org", created_at: "2023-10-31 05:40:33", up...
+        irb(main):002:0> user.reset_digest
+        => "$2a$10$gFaGpK5KC011UvRuIsVp4OQUm3F0o2qvEqye5YYeOWBZs5bN6KWkO"
+        irb(main):003:0> user.reset_sent_at
+        => Wed, 01 Nov 2023 06:03:07 JST +09:00
+      ```
