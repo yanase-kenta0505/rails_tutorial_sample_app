@@ -1161,3 +1161,21 @@
         irb(main):002:0> user.activated
         => false
       ```
+12. コンソール内で新しいユーザーを作成してみてください。新しいユーザーの記憶トークンと有効化トークンはどのような値になっているでしょうか? また、各トークンに対応するダイジェストの値はどうなっているでしょうか？
+13. リスト 11.26で抽象化したauthenticated?メソッドを使って、先ほどの各トークン/ダイジェストの組み合わせで認証が成功することを確認してみましょう。
+    - ```rb
+        irb(main):011:0> user.remember_token
+        => "L0dJpet4FFInHoOlxclKYg"
+        irb(main):012:0> user.activation_token
+        => "3d4ta_Wz8iP8loSf-yY28A"
+        irb(main):013:0> user.remember_digest
+        => "$2a$10$jzfFZ5EJCplup7I8fbKEdODDo7s7E09kq6EPZj0IViwbbdaYaNGpK"
+        irb(main):014:0> user.activation_digest
+        => "$2a$10$moEr2xGzlGszjxqK6dnxgOVqndadZXrpTr890LyuTy2grGEPFUIRO"
+        irb(main):015:0> user.authenticated?(:remember, user.remember_token)
+        => true
+        irb(main):016:0> user.authenticated?(:activation, user.activation_token)
+        => true
+      ```
+
+14. 
