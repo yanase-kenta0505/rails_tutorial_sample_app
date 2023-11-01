@@ -1147,3 +1147,17 @@
         Finished in 1.16719s
         46 tests, 193 assertions, 0 failures, 1 errors, 0 skips
       ```
+
+10. 新しいユーザーを登録したとき、リダイレクト先が適切なURLに変わったことを確認してみましょう。その後、Railsサーバーのログから送信メールの内容を確認してみてください。有効化トークンの値はどうなっていますか?
+    - リダイレクト先はルートになっています
+    - 有効化トークン
+        - o3LoB6ZidAgiAaVoGqTfyg
+11. コンソールを開き、データベース上にユーザーが作成されたことを確認してみましょう。また、このユーザーはデータベース上にはいますが、有効化のステータスがfalseのままになっていることを確認してください。
+    - ```rb
+        irb(main):001:0> user = User.last
+        (0.8ms)  SET NAMES utf8,  @@SESSION.sql_mode = CONCAT(CONCAT(@@sql_mode, ',STRICT_ALL_TABLES'), ',NO_AUTO_VALUE_ON_ZERO'),  @@SESSION.sql_auto_is_null = 0, @@SESSION.wait_timeout = 2147483
+        User Load (1.2ms)  SELECT  `users`.* FROM `users` ORDER BY `users`.`id` DESC LIMIT 1
+        => #<User id: 101, name: "hoge taro", email: "hoge@gmail.com", created_at: "2023-10-31 16:32:36", updated_at: "2...
+        irb(main):002:0> user.activated
+        => false
+      ```
