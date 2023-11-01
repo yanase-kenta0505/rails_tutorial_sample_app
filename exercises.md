@@ -921,7 +921,7 @@
             assert_redirected_to edit_user_url(@user)
             follow_redirect!
             assert_template 'users/edit'
-            
+
             # ログアウトして再度ログイン
             delete logout_path
             log_in_as(@user)
@@ -1188,3 +1188,9 @@
         irb(main):018:0> user.activated?
         => true
       ```
+
+16. リスト 11.35にあるactivateメソッドはupdate_attributeを２回呼び出していますが、これは各行で１回ずつデータベースへ問い合わせしていることになります。リスト 11.39に記したテンプレートを使って、update_attributeの呼び出しを１回のupdate_columns呼び出しにまとめてみましょう (これでデータベースへの問い合わせが１回で済むようになります)。また、変更後にテストを実行し、 greenになることも確認してください。
+17. 現在は、/usersのユーザーindexページを開くとすべてのユーザーが表示され、/users/:idのようにIDを指定すると個別のユーザーを表示できます。しかし考えてみれば、有効でないユーザーは表示する意味がありません。そこで、リスト 11.40のテンプレートを使って、この動作を変更してみましょう9 。なお、ここで使っているActive Recordのwhereメソッドについては、13.3.3でもう少し詳しく説明します。
+18. ここまでの演習課題で変更したコードをテストするために、/users と /users/:id の両方に対する統合テストを作成してみましょう。
+訳注: update_columnsメソッドは、コールバックとバリデーションを実行せずにスキップしますので、コールバックやバリデーションをかける必要がある場合は注意が必要です。
+    - [関連リンク](https://github.com/yanase-kenta0505/rails_tutorial_sample_app/commit/d7f9d02154c5815859facbfd648b964161dcdd1a)
