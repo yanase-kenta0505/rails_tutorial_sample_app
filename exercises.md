@@ -1313,4 +1313,23 @@
         The action 'update' could not be found for PasswordResetsController
       ```
 
-13. 
+13. 12.2.1.1で得られたリンク (Railsサーバーのログから取得) をブラウザで表示し、passwordとconfirmationの文字列をわざと間違えて送信してみましょう。どんなエラーメッセージが表示されるでしょうか?
+    - `Password confirmation doesn't match Password`
+14. コンソールに移り、パスワード再設定を送信したユーザーオブジェクトを見つけてください。見つかったら、そのオブジェクトのpassword_digestの値を取得してみましょう。次に、パスワード再設定フォームから有効なパスワードを入力し、送信してみましょう (図 12.13)。パスワードの再設定は成功したら、再度password_digestの値を取得し、先ほど取得した値と異なっていることを確認してみましょう。ヒント: 新しい値はuser.reloadを通して取得する必要があります。
+    - ```rb
+            irb(main):001:0> user = User.find_by(email: "example@railstutorial.org")
+        (1.1ms)  SET NAMES utf8,  @@SESSION.sql_mode = CONCAT(CONCAT(@@sql_mode, ',STRICT_ALL_TABLES'), ',NO_AUTO_VALUE_ON_ZERO'),  @@SESSION.sql_auto_is_null = 0, @@SESSION.wait_timeout = 2147483
+        User Load (1.4ms)  SELECT  `users`.* FROM `users` WHERE `users`.`email` = 'example@railstutorial.org' LIMIT 1
+        => #<User id: 1, name: "Example User", email: "example@railstutorial.org", created_at: "2023-10-31 05:40:33", up...
+        irb(main):002:0> user.password_digest
+        => "$2a$10$cMx85f4TpDCWxdeX4wJ6Q.pqUZAATSwA28BTsUc1f6iFqZ7MsbYYu"
+        irb(main):003:0> user.password_digest
+        => "$2a$10$cMx85f4TpDCWxdeX4wJ6Q.pqUZAATSwA28BTsUc1f6iFqZ7MsbYYu"
+        irb(main):004:0> user.password_digest
+        => "$2a$10$cMx85f4TpDCWxdeX4wJ6Q.pqUZAATSwA28BTsUc1f6iFqZ7MsbYYu"
+        irb(main):005:0> user = User.find_by(email: "example@railstutorial.org")
+        User Load (7.7ms)  SELECT  `users`.* FROM `users` WHERE `users`.`email` = 'example@railstutorial.org' LIMIT 1
+        => #<User id: 1, name: "Example User", email: "example@railstutorial.org", created_at: "2023-10-31 05:40:33", up...
+        irb(main):006:0> user.password_digest
+        => "$2a$10$5qhUvUCI/2Ya7ys.Wf.o9OCJzvJQG1d9MAJdMpV16QawsSaHIe2oe"
+    ```
