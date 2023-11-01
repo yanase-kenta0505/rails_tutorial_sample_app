@@ -1472,3 +1472,23 @@
         2023-11-02 02:28:21 +0900
         => nil
       ```
+
+4. Railsコンソールを開き、user_idとcontentが空になっているmicropostオブジェクトを作ってみてください。このオブジェクトに対してvalid?を実行すると、失敗することを確認してみましょう。また、生成されたエラーメッセージにはどんな内容が書かれているでしょうか?
+    - ```rb
+        rb(main):001:0> micropost = Micropost.new
+        (1.0ms)  SET NAMES utf8,  @@SESSION.sql_mode = CONCAT(CONCAT(@@sql_mode, ',STRICT_ALL_TABLES'), ',NO_AUTO_VALUE_ON_ZERO'),  @@SESSION.sql_auto_is_null = 0, @@SESSION.wait_timeout = 2147483
+        => #<Micropost id: nil, content: nil, user_id: nil, created_at: nil, updated_at: nil>
+        irb(main):002:0> micropost.valid?
+        => false
+        irb(main):003:0> micropost.errors.full_messages
+        => ["User must exist", "User can't be blank", "Content can't be blank"]
+      ```
+5. コンソールを開き、今度はuser_idが空でcontentが141文字以上のmicropostオブジェクトを作ってみてください。このオブジェクトに対してvalid?を実行すると、失敗することを確認してみましょう。また、生成されたエラーメッセージにはどんな内容が書かれているでしょうか?
+    - ```rb
+        irb(main):004:0> micropost = Micropost.new(content: "a" * 142)
+        => #<Micropost id: nil, content: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...", user_id: nil, created_...
+        irb(main):005:0> micropost.valid?
+        => false
+        irb(main):006:0> micropost.errors.full_messages
+        => ["User must exist", "User can't be blank", "Content is too long (maximum is 140 characters)"]
+      ```
