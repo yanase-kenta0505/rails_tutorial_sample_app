@@ -1178,4 +1178,13 @@
         => true
       ```
 
-14. 
+14. コンソールから、11.2.4で生成したメールに含まれているURLを調べてみてください。URL内のどこに有効化トークンが含まれているでしょうか?
+    - http://localhost:3000/account_activations/<有効化トークン>/edit?email=hoge%40gmail.com
+15. 先ほど見つけたURLをブラウザに貼り付けて、そのユーザーの認証に成功し、有効化できることを確認してみましょう。また、有効化ステータスがtrueになっていることをコンソールから確認してみてください。
+    - ```sh
+        irb(main):017:0> user = User.find_by(email:"hoge@gmail.com")
+        User Load (11.9ms)  SELECT  `users`.* FROM `users` WHERE `users`.`email` = 'hoge@gmail.com' LIMIT 1
+        => #<User id: 101, name: "hoge taro", email: "hoge@gmail.com", created_at: "2023-10-31 16:32:36", updated_at: "2...
+        irb(main):018:0> user.activated?
+        => true
+      ```
