@@ -1278,3 +1278,29 @@
         irb(main):006:0> user.reset_sent_at
         => Wed, 01 Nov 2023 06:34:22 JST +09:00
       ```
+
+9. メイラーのテストだけを実行してみてください。このテストは greenになっているでしょうか?
+    - ```rb
+        claves@clavesnoMacBook-Air sample_app % rails test:mailers
+        Started with run options --seed 39076
+
+        2/2: [========================================================================] 100% Time: 00:00:00, Time: 00:00:00
+
+        Finished in 0.22190s
+        2 tests, 16 assertions, 0 failures, 0 errors, 0 skips
+      ```
+10. リスト 12.12にある２つ目のCGI.escapeを削除すると、テストが redになることを確認してみましょう。
+    - ```rb
+        claves@clavesnoMacBook-Air sample_app % rails test:mailers
+        Started with run options --seed 33650
+
+        ERROR["test_password_reset", UserMailerTest, 0.23315200000070035]
+        test_password_reset#UserMailerTest (0.23s)
+        ArgumentError:         ArgumentError: wrong number of arguments (given 1, expected 2..3)
+                    test/mailers/user_mailer_test.rb:25:in `block in <class:UserMailerTest>'
+
+        2/2: [========================================================================] 100% Time: 00:00:00, Time: 00:00:00
+
+        Finished in 0.23333s
+        2 tests, 14 assertions, 0 failures, 1 errors, 0 skips
+      ```
