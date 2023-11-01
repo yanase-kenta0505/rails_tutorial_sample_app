@@ -1122,3 +1122,28 @@
 
 7. Railsのプレビュー機能を使って、ブラウザから先ほどのメールを表示してみてください。「Date」の欄にはどんな内容が表示されているでしょうか?
     - ![](images/2023-11-01-09-59-37.png)
+
+8. この時点で、テストスイートが greenになっていることを確認してみましょう。
+9. リスト 11.20で使ったCGI.escapeの部分を削除すると、テストが redに変わることを確認してみましょう。
+    - ```sh
+        claves@clavesnoMacBook-Air sample_app % rails test
+        Started with run options --seed 44845
+
+        46/46: [======================================================================] 100% Time: 00:00:01, Time: 00:00:01
+
+        Finished in 1.05194s
+        46 tests, 195 assertions, 0 failures, 0 errors, 0 skips
+
+        claves@clavesnoMacBook-Air sample_app % rails test
+        Started with run options --seed 29599
+
+        ERROR["test_account_activation", UserMailerTest, 0.8494790000841022]
+        test_account_activation#UserMailerTest (0.85s)
+        ArgumentError:         ArgumentError: wrong number of arguments (given 1, expected 2..3)
+                    test/mailers/user_mailer_test.rb:14:in `block in <class:UserMailerTest>'
+
+        46/46: [======================================================================] 100% Time: 00:00:01, Time: 00:00:01
+
+        Finished in 1.16719s
+        46 tests, 193 assertions, 0 failures, 1 errors, 0 skips
+      ```
