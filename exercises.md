@@ -1233,3 +1233,48 @@
         irb(main):003:0> user.reset_sent_at
         => Wed, 01 Nov 2023 06:03:07 JST +09:00
       ```
+
+6. ブラウザから、送信メールのプレビューをしてみましょう。「Date」の欄にはどんな情報が表示されているでしょうか?
+    - `Wed, 01 Nov 2023 15:36:14 +0900`
+7. パスワード再設定フォームから有効なメールアドレスを送信してみましょう。また、Railsサーバーのログを見て、生成された送信メールの内容を確認してみてください。
+    - ```sh
+        Sent mail to example@railstutorial.org (13.1ms)
+        sample_app-web-1  | Date: Wed, 01 Nov 2023 06:34:22 +0000
+        sample_app-web-1  | From: noreply@example.com
+        sample_app-web-1  | To: example@railstutorial.org
+        sample_app-web-1  | Message-ID: <6541f16ee42b5_14aec61852@a35c41915f25.mail>
+        sample_app-web-1  | Subject: Password reset
+        sample_app-web-1  | Mime-Version: 1.0
+        sample_app-web-1  | Content-Type: multipart/alternative;
+        sample_app-web-1  |  boundary="--==_mimepart_6541f16ee302d_14aec61759";
+        sample_app-web-1  |  charset=UTF-8
+        sample_app-web-1  | Content-Transfer-Encoding: 7bit
+        sample_app-web-1  |
+        sample_app-web-1  |
+        sample_app-web-1  | ----==_mimepart_6541f16ee302d_14aec61759
+        sample_app-web-1  | Content-Type: text/plain;
+        sample_app-web-1  |  charset=UTF-8
+        sample_app-web-1  | Content-Transfer-Encoding: 7bit
+        sample_app-web-1  |
+        sample_app-web-1  | To reset your password click the link below:
+        sample_app-web-1  |
+        sample_app-web-1  | http://localhost:3000/password_resets/j9EJ3dWAUwywrA8VqgnMvg/edit?email=example%40railstutorial.org
+        sample_app-web-1  |
+        sample_app-web-1  | This link will expire in two hours.
+        sample_app-web-1  |
+        sample_app-web-1  | If you did not request your password to be reset, please ignore this email and
+        sample_app-web-1  | your password will stay as it is.
+        sample_app-web-1  |
+        sample_app-web-1  |
+        sample_app-web-1  | ----==_mimepart_6541f16ee302d_14aec61759
+      ```
+8. コンソールに移り、先ほどの演習課題でパスワード再設定をしたUserオブジェクトを探してください。オブジェクトを見つけたら、そのオブジェクトが持つreset_digestとreset_sent_atの値を確認してみましょう。
+    - ```rb
+        irb(main):004:0> user = User.find_by(email: "example@railstutorial.org")
+        User Load (8.9ms)  SELECT  `users`.* FROM `users` WHERE `users`.`email` = 'example@railstutorial.org' LIMIT 1
+        => #<User id: 1, name: "Example User", email: "example@railstutorial.org", created_at: "2023-10-31 05:40:33", up...
+        irb(main):005:0> user.reset_digest
+        => "$2a$10$8ERayC1e8A4Z3.BXC8llI./MTZZobXWJv06nNCB8/qiisOqjqK/qe"
+        irb(main):006:0> user.reset_sent_at
+        => Wed, 01 Nov 2023 06:34:22 JST +09:00
+      ```
