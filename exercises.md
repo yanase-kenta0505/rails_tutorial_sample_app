@@ -1304,3 +1304,13 @@
         Finished in 0.23333s
         2 tests, 14 assertions, 0 failures, 1 errors, 0 skips
       ```
+
+11. 12.2.1.1で示した手順に従って、Railsサーバーのログから送信メールを探し出し、そこに記されているリンクを見つけてください。そのリンクをブラウザから表示してみて、図 12.11のように表示されるか確かめてみましょう。
+    - 確認できました
+12. 先ほど表示したページから、実際に新しいパスワードを送信してみましょう。どのような結果になるでしょうか?
+    -  `Unknown action`というエラーが発生する
+    - ```
+        The action 'update' could not be found for PasswordResetsController
+      ```
+
+13. 
