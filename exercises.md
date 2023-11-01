@@ -1492,3 +1492,42 @@
         irb(main):006:0> micropost.errors.full_messages
         => ["User must exist", "User can't be blank", "Content is too long (maximum is 140 characters)"]
       ```
+
+6. データベースにいる最初のユーザーを変数userに代入してください。そのuserオブジェクトを使ってmicropost = user.microposts.create(content: "Lorem ipsum")を実行すると、どのような結果が得られるでしょうか?
+7. 先ほどの演習課題で、データベース上に新しいマイクロポストが追加されたはずです。user.microposts.find(micropost.id)を実行して、本当に追加されたのかを確かめてみましょう。また、先ほど実行したmicropost.idの部分をmicropostに変更すると、結果はどうなるでしょうか?
+8. user == micropost.userを実行した結果はどうなるでしょうか? また、user.microposts.first == micropost を実行した結果はどうなるでしょうか? それぞれ確認してみてください。
+    - ```rb
+        irb(main):010:0> user = User.first
+        User Load (3.5ms)  SELECT  `users`.* FROM `users` ORDER BY `users`.`id` ASC LIMIT 1
+        => #<User id: 1, name: "Example User", email: "example@railstutorial.org", created_at: "2023-10-31 05:40:33", up...
+        irb(main):011:0> micro ipsum")
+        irb(main):011:0> micropost = user.microposts.create(content: "Lorem ipsum")
+        (0.7ms)  BEGIN
+        SQL (1.1ms)  INSERT INTO `microposts` (`content`, `user_id`, `created_at`, `updated_at`) VALUES ('Lorem ipsum', 1, '2023-11-02 03:01:52', '2023-11-02 03:01:52')
+        (1.2ms)  COMMIT
+        => #<Micropost id: 3, content: "Lorem ipsum", user_id: 1, created_at: "2023-11-01 18:01:52", updated_at: "2023-1...
+        irb(main):012:0> found_micropod)
+        puts found_micropost == micropost  # => true
+        irb(main):012:0> found_micropost = user.microposts.find(micropost.id)
+        Micropost Load (3.6ms)  SELECT  `microposts`.* FROM `microposts` WHERE `microposts`.`user_id` = 1 AND `microposts`.`id` = 3 LIMIT 1
+        => #<Micropost id: 3, content: "Lorem ipsum", user_id: 1, created_at: "2023-11-01 18:01:52", updated_at: "2023-1...
+        irb(main):013:0> puts found_micropost == micropost  # => true
+        true
+        => nil
+        irb(main):014:0> founputs found_micropost == micropost  # => true
+        irb(main):014:0> found_micropost = user.microposts.find(micropost)
+        Traceback (most recent call last):
+                1: from (irb):14
+        ArgumentError (You are passing an instance of ActiveRecord::Base to `find`. Please pass the id of the object by calling `.id`.)
+        puts found_micropost == micropost  # => true
+        irb(main):015:0> puts found_micropost == micropost  # => true
+        true
+        => nil
+        irb(main):016:0> puts user == micropost.user  # => true
+        true
+        => nil
+        irb(main):017:0> puts user.microposts.first == micropost
+        Micropost Load (14.5ms)  SELECT  `microposts`.* FROM `microposts` WHERE `microposts`.`user_id` = 1 ORDER BY `microposts`.`id` ASC LIMIT 1
+        false
+        => nil
+      ```
