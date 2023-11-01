@@ -1333,3 +1333,90 @@
         irb(main):006:0> user.password_digest
         => "$2a$10$5qhUvUCI/2Ya7ys.Wf.o9OCJzvJQG1d9MAJdMpV16QawsSaHIe2oe"
     ```
+
+15. リスト 12.6にあるcreate_reset_digestメソッドはupdate_attributeを２回呼び出していますが、これは各行で１回ずつデータベースへ問い合わせしていることになります。リスト 12.20に記したテンプレートを使って、update_attributeの呼び出しを１回のupdate_columns呼び出しにまとめてみましょう (これでデータベースへの問い合わせが１回で済むようになります)。また、変更後にテストを実行し、 greenになることも確認してください。ちなみにリスト 12.20にあるコードには、前章の演習 (リスト 11.39) の解答も含まれています。
+    - ```rb
+        def create_reset_digest
+            self.reset_token = User.new_token
+            update_columns(reset_digest:  User.digest(reset_token), reset_sent_at: Time.zone.now)
+        end
+      ```
+
+16. リスト 12.21のテンプレートを埋めて、期限切れのパスワード再設定で発生する分岐 (リスト 12.16) を統合テストで網羅してみましょう (12.21 のコードにあるresponse.bodyは、そのページのHTML本文をすべて返すメソッドです)。期限切れをテストする方法はいくつかありますが、リスト 12.21でオススメした手法を使えば、レスポンスの本文に「expired」という語があるかどうかでチェックできます (なお、大文字と小文字は区別されません)。
+    - ```rb
+         test "expired token" do
+            get new_password_reset_path
+            post password_resets_path,
+                params: { password_reset: { email: @user.email } }
+
+            @user = assigns(:user)
+            @user.update_attribute(:reset_sent_at, 3.hours.ago)
+            patch password_reset_path(@user.reset_token),
+                params: { email: @user.email,
+                            user: { password:              "foobar",
+                                    password_confirmation: "foobar" } }
+            assert_response :redirect
+            follow_redirect!
+            assert_match /expired/i, response.body
+        end
+      ```
+
+17. ２時間経ったらパスワードを再設定できなくする方針は、セキュリティ的に好ましいやり方でしょう。しかし、もっと良くする方法はまだあります。例えば、公共の (または共有された) コンピューターでパスワード再設定が行われた場合を考えてみてください。仮にログアウトして離席したとしても、２時間以内であれば、そのコンピューターの履歴からパスワード再設定フォームを表示させ、パスワードを更新してしまうことができてしまいます (しかもそのままログイン機構まで突破されてしまいます!)。この問題を解決するために、リスト 12.22のコードを追加し、パスワードの再設定に成功したらダイジェストをnilになるように変更してみましょう5 。
+    - 変更しました
+
+18. リスト 12.18に１行追加し、１つ前の演習課題に対するテストを書いてみましょう。ヒント: リスト 9.25のassert_nilメソッドとリスト 11.33のuser.reloadメソッドを組み合わせて、reset_digest属性を直接テストしてみましょう。
+    - ```rb
+        test "password resets" do
+            get new_password_reset_path
+            assert_template 'password_resets/new'
+            # メールアドレスが無効
+            post password_resets_path, params: { password_reset: { email: "" } }
+            assert_not flash.empty?
+            assert_template 'password_resets/new'
+            # メールアドレスが有効
+            post password_resets_path,
+                params: { password_reset: { email: @user.email } }
+            assert_not_equal @user.reset_digest, @user.reload.reset_digest
+            assert_equal 1, ActionMailer::Base.deliveries.size
+            assert_not flash.empty?
+            assert_redirected_to root_url
+            # パスワード再設定フォームのテスト
+            user = assigns(:user)
+            # メールアドレスが無効
+            get edit_password_reset_path(user.reset_token, email: "")
+            assert_redirected_to root_url
+            # 無効なユーザー
+            user.toggle!(:activated)
+            get edit_password_reset_path(user.reset_token, email: user.email)
+            assert_redirected_to root_url
+            user.toggle!(:activated)
+            # メールアドレスが有効で、トークンが無効
+            get edit_password_reset_path('wrong token', email: user.email)
+            assert_redirected_to root_url
+            # メールアドレスもトークンも有効
+            get edit_password_reset_path(user.reset_token, email: user.email)
+            assert_template 'password_resets/edit'
+            assert_select "input[name=email][type=hidden][value=?]", user.email
+            # 無効なパスワードとパスワード確認
+            patch password_reset_path(user.reset_token),
+                params: { email: user.email,
+                            user: { password:              "foobaz",
+                                    password_confirmation: "barquux" } }
+            assert_select 'div#error_explanation'
+            # パスワードが空
+            patch password_reset_path(user.reset_token),
+                params: { email: user.email,
+                            user: { password:              "",
+                                    password_confirmation: "" } }
+            assert_select 'div#error_explanation'
+            # 有効なパスワードとパスワード確認
+            patch password_reset_path(user.reset_token),
+                params: { email: user.email,
+                            user: { password:              "foobaz",
+                                    password_confirmation: "foobaz" } }
+            assert is_logged_in?
+            assert_not flash.empty?
+            assert_redirected_to user
+            assert_nil @user.reload.reset_digest
+        end
+      ```
