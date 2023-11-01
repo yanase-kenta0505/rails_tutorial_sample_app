@@ -1439,3 +1439,36 @@
 20. メールを受信できたら、実際にメールをクリックしてアカウントを有効化してみましょう。また、Heroku上のログを調べてみて、有効化に関するログがどうなっているのか調べてみてください。ヒント: ターミナルからheroku logsコマンドを実行してみましょう。
 21. アカウントを有効化できたら、今度はパスワードの再設定を試してみましょう。正しくパスワードの再設定ができたでしょうか?
     - herokuを使わないので飛ばす
+
+
+# 第13章
+## チェックシート
+## 演習
+1. RailsコンソールでMicropost.newを実行し、インスタンスを変数micropostに代入してください。その後、user_idに最初のユーザーのidを、contentに "Lorem ipsum" をそれぞれ代入してみてください。この時点では、 micropostオブジェクトのマジックカラム (created_atとupdated_at) には何が入っているでしょうか?
+    - nil
+2. 先ほど作ったオブジェクトを使って、micropost.userを実行してみましょう。どのような結果が返ってくるでしょうか? また、micropost.user.nameを実行した場合の結果はどうなるでしょうか?
+    - ```rb
+        irb(main):013:0> puts micropost.user
+        User Load (6.5ms)  SELECT  `users`.* FROM `users` WHERE `users`.`id` = 1 LIMIT 1
+        #<User:0x000000013beae980>
+        => nil
+      ```
+    - ```rb
+        irb(main):014:0> puts micropost.user.name
+        Example User
+        => nil
+      ```
+3. 先ほど作ったmicropostオブジェクトをデータベースに保存してみましょう。この時点でもう一度マジックカラムの内容を調べてみましょう。今度はどのような値が入っているでしょうか?
+    - ```rb
+        irb(main):015:0> micropost.save
+        (1.8ms)  BEGIN
+        SQL (7.5ms)  INSERT INTO `microposts` (`content`, `user_id`, `created_at`, `updated_at`) VALUES ('Lorem ipsum', 1, '2023-11-02 02:28:21', '2023-11-02 02:28:21')
+        (5.5ms)  COMMIT
+        => true
+        irb(main):016:0> puts micropost.created_at
+        2023-11-02 02:28:21 +0900
+        => nil
+        irb(main):017:0> puts micropost.updated_at
+        2023-11-02 02:28:21 +0900
+        => nil
+      ```
