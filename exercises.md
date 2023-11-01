@@ -1109,3 +1109,15 @@
       ```
 
     - テストが成功することを確認しました
+
+6. コンソールを開き、CGIモジュールのescapeメソッド (リスト 11.15) でメールアドレスの文字列をエスケープできることを確認してみましょう。このメソッドで"Don't panic!"をエスケープすると、どんな結果になりますか?
+    - ```sh
+        Loading development environment (Rails 5.1.6)
+        irb(main):001:0> 
+        irb(main):002:0> CGI.escape('foo@example.com')
+        => "foo%40example.com"
+        irb(main):003:0> CGI.escape("Don't panic!")
+        => "Don%27t+panic%21"
+      ```
+
+7. 
