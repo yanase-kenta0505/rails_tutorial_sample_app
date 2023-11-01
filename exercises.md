@@ -1531,3 +1531,49 @@
         false
         => nil
       ```
+
+9. Micropost.first.created_atの実行結果と、Micropost.last.created_atの実行結果を比べてみましょう。
+10. Micropost.firstを実行したときに発行されるSQL文はどうなっているでしょうか? 同様にして、Micropost.lastの場合はどうなっているでしょうか? ヒント: それぞれをコンソール上で実行したときに表示される文字列が、SQL文になります。
+11. データベース上の最初のユーザーを変数userに代入してください。そのuserオブジェクトが最初に投稿したマイクロポストのidはいくつでしょうか? 次に、destroyメソッドを使ってそのuserオブジェクトを削除してみてください。削除すると、そのuserに紐付いていたマイクロポストも削除されていることをMicropost.findで確認してみましょう。
+    - ```rb
+        irb(main):001:0> puts Micropost.first.created_at
+        (1.0ms)  SET NAMES utf8,  @@SESSION.sql_mode = CONCAT(CONCAT(@@sql_mode, ',STRICT_ALL_TABLES'), ',NO_AUTO_VALUE_ON_ZERO'),  @@SESSION.sql_auto_is_null = 0, @@SESSION.wait_timeout = 2147483
+        Micropost Load (1.4ms)  SELECT  `microposts`.* FROM `microposts` ORDER BY `microposts`.`created_at` DESC LIMIT 1
+        2023-11-02 03:01:52 +0900
+        => nil
+        Micropost Load (3.5ms)  SELECT  `microposts`.* FROM `microposts` ORDER BY `microposts`.`created_at` ASC LIMIT 1
+        2023-11-02 02:28:21 +0900
+        => nil
+        irb(main):003:0> Micropost.first
+        Micropost Load (6.4ms)  SELECT  `microposts`.* FROM `microposts` ORDER BY `microposts`.`created_at` DESC LIMIT 1
+        => #<Micropost id: 3, content: "Lorem ipsum", user_id: 1, created_at: "2023-11-01 18:01:52", updated_at: "2023-11-01 18:01:52">
+        irb(main):004:0> Micropost.last
+        Micropost Load (5.6ms)  SELECT  `microposts`.* FROM `microposts` ORDER BY `microposts`.`created_at` ASC LIMIT 1
+        => #<Micropost id: 1, content: "Lorem ipsum", user_id: 1, created_at: "2023-11-01 17:28:21", updated_at: "2023-11-01 17:28:21">
+        irb(main):005:0> user = User.first
+        User Load (3.8ms)  SELECT  `users`.* FROM `users` ORDER BY `users`.`id` ASC LIMIT 1
+        => #<User id: 1, name: "Example User", email: "example@railstutorial.org", created_at: "2023-10-31 05:40:33", up...
+        irb(main):006:0> puts user.micropost.first.id
+        Traceback (most recent call last):
+                1: from (irb):6
+        NoMethodError (undefined method `micropost' for #<User:0x0000000104671fd8>)
+        Did you mean?  microposts
+                    microposts=
+        irb(main):007:0> puts user.microposts.first.id
+        Micropost Load (6.5ms)  SELECT  `microposts`.* FROM `microposts` WHERE `microposts`.`user_id` = 1 ORDER BY `microposts`.`created_at` DESC LIMIT 1
+        3
+        => nil
+        irb(main):008:0> user.destroy
+        (7.4ms)  BEGIN
+        Micropost Load (5.8ms)  SELECT `microposts`.* FROM `microposts` WHERE `microposts`.`user_id` = 1 ORDER BY `microposts`.`created_at` DESC
+        SQL (2.6ms)  DELETE FROM `microposts` WHERE `microposts`.`id` = 3
+        SQL (4.1ms)  DELETE FROM `microposts` WHERE `microposts`.`id` = 2
+        SQL (3.0ms)  DELETE FROM `microposts` WHERE `microposts`.`id` = 1
+        SQL (2.7ms)  DELETE FROM `users` WHERE `users`.`id` = 1
+        (2.0ms)  COMMIT
+        => #<User id: 1, name: "Example User", email: "example@railstutorial.org", created_at: "2023-10-31 05:40:33", updated_at: "2023-10-31 22:41:21", password_digest: "$2a$10$5qhUvUCI/2Ya7ys.Wf.o9OCJzvJQG1d9MAJdMpV16Qa...", remember_digest: nil, admin: true, activation_digest: "$2a$10$at.5l6Ytb/D1zDlmP7MKreZs6cn9bHiyPekea3OX07f...", activated: true, activated_at: "2023-10-31 05:40:33", reset_digest: "$2a$10$8ERayC1e8A4Z3.BXC8llI./MTZZobXWJv06nNCB8/qi...", reset_sent_at: "2023-10-31 21:34:22">
+        irb(main):009:0> Micropost.find(user.microposts.first.id)
+        Traceback (most recent call last):
+                1: from (irb):9
+        NoMethodError (undefined method `id' for nil:NilClass)
+      ```
