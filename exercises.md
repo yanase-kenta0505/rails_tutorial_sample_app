@@ -1601,7 +1601,7 @@
 15. (1..10).to_a.take(6)というコードの実行結果を推測できますか? 推測した値が合っているかどうか、実際にコンソールを使って確認してみましょう。
 16. 先ほどの演習にあったto_aメソッドの部分は本当に必要でしょうか? 確かめてみてください。
 17. Fakerはlorem ipsum以外にも、非常に多種多様の事例に対応しています。Fakerのドキュメント (英語) を眺めながら画面に出力する方法を学び、実際に大学名や電話番号、Hipster IpsumやChuck Norris facts (参考: チャック・ノリスの真実) を画面に出力してみましょう。
-    - ``` rb
+    - ``` rb``
         claves@clavesnoMacBook-Air sample_app % rails c
         Loading development environment (Rails 5.1.6)
         irb(main):001:0> (1..10).to_a.take(6)
@@ -1619,4 +1619,22 @@
         irb(main):007:0> Faker::ChuckNorris.fact
         => "Chuck Norris doesn't program with a keyboard. He stares the computer down until it does what he wants."
         irb(main):008:0> 
+      ```
+
+18. リスト 13.28にある２つの'h1'のテストが正しいか確かめるため、該当するアプリケーション側のコードをコメントアウトしてみましょう。テストが green から redに変わることを確認してみてください。
+    - 確認しました
+19. リスト 13.28にあるテストを変更して、will_paginateが１度のみ表示されていることをテストしてみましょう。ヒント: 表 5.2を参考にしてください。
+    - ```rb
+        test "profile display" do
+            get user_path(@user)
+            assert_template 'users/show'
+            assert_select 'title', full_title(@user.name)
+            assert_select 'h1', text: @user.name
+            assert_select 'h1>img.gravatar'
+            assert_match @user.microposts.count.to_s, response.body
+            assert_select 'div.pagination', count: 1
+            @user.microposts.paginate(page: 1).each do |micropost|
+                assert_match micropost.content, response.body
+            end
+        end
       ```
