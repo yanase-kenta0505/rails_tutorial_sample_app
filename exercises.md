@@ -1577,3 +1577,24 @@
                 1: from (irb):9
         NoMethodError (undefined method `id' for nil:NilClass)
       ```
+
+12. 7.3.3で軽く説明したように、今回ヘルパーメソッドとして使ったtime_ago_in_wordsメソッドは、Railsコンソールのhelperオブジェクトから呼び出すことができます。このhelperオブジェクトのtime_ago_in_wordsメソッドを使って、3.weeks.agoや6.months.agoを実行してみましょう。
+13. helper.time_ago_in_words(1.year.ago)と実行すると、どういった結果が返ってくるでしょうか?
+14. micropostsオブジェクトのクラスは何でしょうか? ヒント: リスト 13.23内のコードにあるように、まずはpaginateメソッド (引数はpage: nil) でオブジェクトを取得し、その後classメソッドを呼び出してみましょう。
+    - ```rb
+        irb(main):001:0> helper.time_ago_in_words(3.weeks.ago)
+        => "21 days"
+        irb(main):002:0> helper.time_ago_in_words(6.months.ago)
+        => "6 months"
+        irb(main):003:0> helper.time_ago_in_words(1.year.ago)
+        => "about 1 year"
+        irb(main):004:0> user = User.first
+        (1.5ms)  SET NAMES utf8,  @@SESSION.sql_mode = CONCAT(CONCAT(@@sql_mode, ',STRICT_ALL_TABLES'), ',NO_AUTO_VALUE_ON_ZERO'),  @@SESSION.sql_auto_is_null = 0, @@SESSION.wait_timeout = 2147483
+        User Load (1.5ms)  SELECT  `users`.* FROM `users` ORDER BY `users`.`id` ASC LIMIT 1
+        => #<User id: 1, name: "Example User", email: "example@railstutorial.org", created_at: "2023-11-01 18:35:44", up...
+        irb(main):005:0> microposts = user.microposts.paginate(page: nil)
+        Micropost Load (9.8ms)  SELECT  `microposts`.* FROM `microposts` WHERE `microposts`.`user_id` = 1 ORDER BY `microposts`.`created_at` DESC LIMIT 11 OFFSET 0
+        => #<ActiveRecord::AssociationRelation []>
+        irb(main):006:0> microposts.class
+        => Micropost::ActiveRecord_AssociationRelation
+      ```
