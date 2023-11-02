@@ -1672,3 +1672,8 @@
         Micropost Load (5.5ms)  SELECT `microposts`.* FROM `microposts` WHERE (user_id = 1) ORDER BY `microposts`.`created_at` DESC
         => true
       ```
+
+24. マイクロポストを作成し、その後、作成したマイクロポストを削除してみましょう。次に、Railsサーバーのログを見てみて、DELETE文の内容を確認してみてください。
+    - `DELETE FROM `microposts` WHERE `microposts`.`id` = 302`
+25. redirect_to request.referrer || root_urlの行をredirect_back(fallback_location: root_url)と置き換えてもうまく動くことを、ブラウザを使って確認してみましょう (このメソッドはRails 5から新たに導入されました)。
+    - 確認しました
