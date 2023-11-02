@@ -1677,3 +1677,21 @@
     - `DELETE FROM `microposts` WHERE `microposts`.`id` = 302`
 25. redirect_to request.referrer || root_urlの行をredirect_back(fallback_location: root_url)と置き換えてもうまく動くことを、ブラウザを使って確認してみましょう (このメソッドはRails 5から新たに導入されました)。
     - 確認しました
+26. リスト 13.55で示した４つのコメント (「無効な送信」など) のそれぞれに対して、テストが正しく動いているか確認してみましょう。具体的には、対応するアプリケーション側のコードをコメントアウトし、テストが redになることを確認し、元に戻すと greenになることを確認してみましょう。
+    - 確認しました
+27. サイドバーにあるマイクロポストの合計投稿数をテストしてみましょう。このとき、単数形 (micropost) と複数形 (microposts) が正しく表示されているかどうかもテストしてください。ヒント: リスト 13.57を参考にしてみてください。
+    - ````rb
+        test "micropost sidebar count" do
+            log_in_as(@user)
+            get root_path
+            assert_match "#{@user.microposts.count} microposts", response.body
+            # ユーザーがまだマイクロポストを投稿していない場合
+            other_user = users(:malory)
+            log_in_as(other_user)
+            get root_path
+            assert_match "0 microposts", response.body
+            other_user.microposts.create!(content: "A micropost")
+            get root_path
+            assert_match "1 micropost", response.body
+        end
+      ```
