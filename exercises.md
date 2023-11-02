@@ -1695,3 +1695,44 @@
             assert_match "1 micropost", response.body
         end
       ```
+
+28. 画像付きのマイクロポストを投稿してみましょう。もしかして、大きすぎる画像が表示されてしまいましたか? (心配しないでください、次の13.4.3でこの問題を直します)。
+    - 確認しました
+29. リスト 13.63に示すテンプレートを参考に、13.4で実装した画像アップローダーをテストしてください。テストの準備として、まずはサンプル画像をfixtureディレクトリに追加してください (コマンド例: cp app/assets/images/rails.png test/fixtures/)。リスト 13.63で追加したテストでは、Homeページにあるファイルアップロードと、投稿に成功した時に画像が表示されているかどうかをチェックしています。なお、テスト内にあるfixture_file_uploadというメソッドは、fixtureで定義されたファイルをアップロードする特別なメソッドです18 。ヒント: picture属性が有効かどうかを確かめるときは、11.3.3で紹介したassignsメソッドを使ってください。このメソッドを使うと、投稿に成功した後にcreateアクション内のマイクロポストにアクセスするようになります。
+    - ```rb
+        test "micropost interface with image upload" do
+            log_in_as(@user)
+            get root_path
+            assert_select 'input[type="file"]'
+
+            # 無効な送信
+            assert_no_difference 'Micropost.count' do
+                post microposts_path, params: { micropost: { content: "" } }
+            end
+            assert_select 'div#error_explanation'
+
+            # 有効な送信
+            content = "This micropost really ties the room together"
+            picture = fixture_file_upload('test/fixtures/rails.png', 'image/png')
+            assert_difference 'Micropost.count', 1 do
+                post microposts_path, params: { micropost: { content: content, picture: picture } }
+            end
+            assert_redirected_to root_url
+            follow_redirect!
+            assert_match content, response.body
+            micropost = assigns(:micropost)
+            assert micropost.picture?
+
+            # 投稿を削除する
+            assert_select 'a', text: 'delete'
+            first_micropost = @user.microposts.paginate(page: 1).first
+            assert_difference 'Micropost.count', -1 do
+                delete micropost_path(first_micropost)
+            end
+
+            # 別のユーザーのプロフィールにアクセス (削除リンクがないことを確認)
+            get user_path(users(:archer))
+            assert_select 'a', text: 'delete', count: 0
+        end
+
+      ```
