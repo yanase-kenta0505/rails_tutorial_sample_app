@@ -1645,4 +1645,30 @@
 21. Homeページをリファクタリングして、if-else文の分岐のそれぞれに対してパーシャルを作ってみましょう。
     - [リンク](https://github.com/yanase-kenta0505/rails_tutorial_sample_app/commit/71ffcc553041b0e0f2aa2233a72c0ca0fffbeada)
 
-22. 
+22. 新しく実装したマイクロポストの投稿フォームを使って、実際にマイクロポストを投稿してみましょう。Railsサーバーのログ内にあるINSERT文では、どういった内容をデータベースに送っているでしょうか? 確認してみてください。
+    - ```
+         INSERT INTO `microposts` (`content`, `user_id`, `created_at`, `updated_at`) VALUES ('tests', 1, '2023-11-02 02:47:15', '2023-11-02 02:47:15')
+      ```
+23. コンソールを開き、user変数にデータベース上の最初のユーザーを代入してみましょう。その後、Micropost.where("user_id = ?", user.id)とuser.microposts、そしてuser.feedをそれぞれ実行してみて、実行結果がすべて同じであることを確認してみてください。ヒント: ==で比較すると結果が同じかどうか簡単に判別できます。
+    - ```rb
+        irb(main):001:0> user = User.first
+        (1.0ms)  SET NAMES utf8,  @@SESSION.sql_mode = CONCAT(CONCAT(@@sql_mode, ',STRICT_ALL_TABLES'), ',NO_AUTO_VALUE_ON_ZERO'),  @@SESSION.sql_auto_is_null = 0, @@SESSION.wait_timeout = 2147483
+        User Load (1.0ms)  SELECT  `users`.* FROM `users` ORDER BY `users`.`id` ASC LIMIT 1
+        => #<User id: 1, name: "Example User", email: "example@railstutorial.org", created_at: "2023-11-02 00:45:36", up...
+        irb(main):002:0> microposts_by_where = Micropost.where("user_id = ?", user.id)
+        Micropost Load (4.3ms)  SELECT  `microposts`.* FROM `microposts` WHERE (user_id = 1) ORDER BY `microposts`.`created_at` DESC LIMIT 11
+        => #<ActiveRecord::Relation [#<Micropost id: 295, content: "Ipsum earum distinctio sit enim omnis.", user_id: 1,...
+        irb(main):003:0> microposts_by_association = user.microposts
+        Micropost Load (4.6ms)  SELECT  `microposts`.* FROM `microposts` WHERE `microposts`.`user_id` = 1 ORDER BY `microposts`.`created_at` DESC LIMIT 11
+        => #<ActiveRecord::Associations::CollectionProxy [#<Micropost id: 295, content: "Ipsum earum distinctio sit enim...
+        irb(main):004:0> microposts_by_feed = user.feed
+        Micropost Load (4.9ms)  SELECT  `microposts`.* FROM `microposts` WHERE (user_id = 1) ORDER BY `microposts`.`created_at` DESC LIMIT 11
+        => #<ActiveRecord::Relation [#<Micropost id: 295, content: "Ipsum earum distinctio sit enim omnis.", user_id: 1,...
+        irb(main):005:0> microposts_by_where == microposts_by_association
+        Micropost Load (8.8ms)  SELECT `microposts`.* FROM `microposts` WHERE `microposts`.`user_id` = 1 ORDER BY `microposts`.`created_at` DESC
+        Micropost Load (7.0ms)  SELECT `microposts`.* FROM `microposts` WHERE (user_id = 1) ORDER BY `microposts`.`created_at` DESC
+        => true
+        irb(main):006:0> microposts_by_association == microposts_by_feed
+        Micropost Load (5.5ms)  SELECT `microposts`.* FROM `microposts` WHERE (user_id = 1) ORDER BY `microposts`.`created_at` DESC
+        => true
+      ```
