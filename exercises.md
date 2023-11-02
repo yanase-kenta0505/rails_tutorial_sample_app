@@ -1641,3 +1641,8 @@
 
 20. なぜUsersコントローラ内にあるlogged_in_userフィルターを残したままにするとマズイのでしょうか? 考えてみてください。
     - ApplicationController と UsersController の両方に logged_in_user メソッドが定義されていると、どちらのメソッドが呼ばれるかが曖昧になるため
+
+21. Homeページをリファクタリングして、if-else文の分岐のそれぞれに対してパーシャルを作ってみましょう。
+    - [リンク](https://github.com/yanase-kenta0505/rails_tutorial_sample_app/commit/71ffcc553041b0e0f2aa2233a72c0ca0fffbeada)
+
+22. 
