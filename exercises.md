@@ -1638,3 +1638,6 @@
             end
         end
       ```
+
+20. なぜUsersコントローラ内にあるlogged_in_userフィルターを残したままにするとマズイのでしょうか? 考えてみてください。
+    - ApplicationController と UsersController の両方に logged_in_user メソッドが定義されていると、どちらのメソッドが呼ばれるかが曖昧になるため
