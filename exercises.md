@@ -1598,3 +1598,25 @@
         irb(main):006:0> microposts.class
         => Micropost::ActiveRecord_AssociationRelation
       ```
+15. (1..10).to_a.take(6)というコードの実行結果を推測できますか? 推測した値が合っているかどうか、実際にコンソールを使って確認してみましょう。
+16. 先ほどの演習にあったto_aメソッドの部分は本当に必要でしょうか? 確かめてみてください。
+17. Fakerはlorem ipsum以外にも、非常に多種多様の事例に対応しています。Fakerのドキュメント (英語) を眺めながら画面に出力する方法を学び、実際に大学名や電話番号、Hipster IpsumやChuck Norris facts (参考: チャック・ノリスの真実) を画面に出力してみましょう。
+    - ``` rb
+        claves@clavesnoMacBook-Air sample_app % rails c
+        Loading development environment (Rails 5.1.6)
+        irb(main):001:0> (1..10).to_a.take(6)
+        => [1, 2, 3, 4, 5, 6]
+        irb(main):002:0> (1..10).take(6)
+        => [1, 2, 3, 4, 5, 6]
+        irb(main):003:0> require 'faker'
+        => false
+        irb(main):004:0> Faker::University.name
+        => "Northern Yundt Institute"
+        irb(main):005:0> Faker::PhoneNumber.phone_number
+        => "1-568-351-1174 x836"
+        irb(main):006:0> Faker::Hipster.sentence  
+        => "Chia narwhal helvetica bespoke raw denim fingerstache stumptown kogi."
+        irb(main):007:0> Faker::ChuckNorris.fact
+        => "Chuck Norris doesn't program with a keyboard. He stares the computer down until it does what he wants."
+        irb(main):008:0> 
+      ```
