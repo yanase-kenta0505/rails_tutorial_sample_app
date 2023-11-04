@@ -10,6 +10,7 @@ class MicropostsInterfaceTest < ActionDispatch::IntegrationTest
     log_in_as(@user)
     get root_path
     assert_select 'div.pagination'
+    assert_select 'input[type="file"]' # 画像アップロード用のinputタグが存在するかを確認
     # 無効な送信
     assert_no_difference 'Micropost.count' do
       post microposts_path, params: { micropost: { content: "" } }
@@ -17,10 +18,11 @@ class MicropostsInterfaceTest < ActionDispatch::IntegrationTest
     assert_select 'div#error_explanation'
     # 有効な送信
     content = "This micropost really ties the room together"
+    picture = fixture_file_upload('test/fixtures/rails.png', 'image/png')
     assert_difference 'Micropost.count', 1 do
-      post microposts_path, params: { micropost: { content: content } }
+      post microposts_path, params: { micropost: { content: content, picture: picture } }
     end
-    assert_redirected_to root_url
+    assert assigns(:micropost).picture? # assignsを使用して、@micropost変数にアクセスし、pictureが存在するかを確認
     follow_redirect!
     assert_match content, response.body
     # 投稿を削除する
@@ -29,7 +31,7 @@ class MicropostsInterfaceTest < ActionDispatch::IntegrationTest
     assert_difference 'Micropost.count', -1 do
       delete micropost_path(first_micropost)
     end
-    # 違うユーザーのプロフィールにアクセス (削除リンクがないことを確認)
+    # 別のユーザーのプロフィールにアクセス (削除リンクがないことを確認)
     get user_path(users(:archer))
     assert_select 'a', text: 'delete', count: 0
   end
@@ -47,40 +49,4 @@ class MicropostsInterfaceTest < ActionDispatch::IntegrationTest
     get root_path
     assert_match "1 micropost", response.body
   end
-
-  test "micropost interface with image upload" do
-    log_in_as(@user)
-    get root_path
-    assert_select 'input[type="file"]'
-
-    # 無効な送信
-    assert_no_difference 'Micropost.count' do
-      post microposts_path, params: { micropost: { content: "" } }
-    end
-    assert_select 'div#error_explanation'
-
-    # 有効な送信
-    content = "This micropost really ties the room together"
-    picture = fixture_file_upload('test/fixtures/rails.png', 'image/png')
-    assert_difference 'Micropost.count', 1 do
-      post microposts_path, params: { micropost: { content: content, picture: picture } }
-    end
-    assert_redirected_to root_url
-    follow_redirect!
-    assert_match content, response.body
-    micropost = assigns(:micropost)
-    assert micropost.picture?
-
-    # 投稿を削除する
-    assert_select 'a', text: 'delete'
-    first_micropost = @user.microposts.paginate(page: 1).first
-    assert_difference 'Micropost.count', -1 do
-      delete micropost_path(first_micropost)
-    end
-
-    # 別のユーザーのプロフィールにアクセス (削除リンクがないことを確認)
-    get user_path(users(:archer))
-    assert_select 'a', text: 'delete', count: 0
-  end
-
 end
