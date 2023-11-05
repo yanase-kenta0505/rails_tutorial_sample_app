@@ -1851,4 +1851,23 @@
         User Exists (2.8ms)  SELECT  1 AS one FROM `users` INNER JOIN `relationships` ON `users`.`id` = `relationships`.`followed_id` WHERE `relationships`.`follower_id` = 762146111 AND `users`.`id` = 950961012 LIMIT 1
         => false
     ```
-8. 
+8. コンソールを開き、何人かのユーザーが最初のユーザーをフォローしている状況を作ってみてください。最初のユーザーをuserとすると、user.followers.map(&:id)の値はどのようになっているでしょうか?
+    - ```rb
+        irb(main):007:0> user.followers.map(&:id)
+        User Load (10.9ms)  SELECT `users`.* FROM `users` INNER JOIN `relationships` ON `users`.`id` = `relationships`.`follower_id` WHERE `relationships`.`followed_id` = 1
+        => [2, 3]
+      ```
+9. 上の演習が終わったら、user.followers.countの実行結果が、先ほどフォローさせたユーザー数と一致していることを確認してみましょう。
+    - ```rb
+        irb(main):008:0> user.followers.count
+        (7.5ms)  SELECT COUNT(*) FROM `users` INNER JOIN `relationships` ON `users`.`id` = `relationships`.`follower_id` WHERE `relationships`.`followed_id` = 1
+        => 2
+      ```
+10. user.followers.countを実行した結果、出力されるSQL文はどのような内容になっているでしょうか? また、user.followers.to_a.countの実行結果と違っている箇所はありますか? ヒント: もしuserに100万人のフォロワーがいた場合、どのような違いがあるでしょうか? 考えてみてください。
+    - SQL
+        - ```sql
+            SELECT COUNT(*) FROM `users` INNER JOIN `relationships` ON `users`.`id` = `relationships`.`follower_id` WHERE `relationships`.`followed_id` = 1
+          ```
+    - user.followers.to_a.countの実行結果と違っている箇所はありますか?
+        - メモリの消費量に違いが出る
+        - user.followers.count と user.followers.to_a.count の主な違いは、前者がデータベースレベルでカウントを行い、後者がRubyの配列操作を使用してカウントを行う点
