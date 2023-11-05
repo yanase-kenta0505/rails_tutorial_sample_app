@@ -1786,3 +1786,25 @@
                 1: from (irb):12:in `rescue in irb_binding'
         NoMethodError (undefined method `following' for #<User:0x00000001143083a0>)
       ```
+3. コンソールを開き、表 14.1のcreateメソッドを使ってActiveRelationshipを作ってみましょう。データベース上に２人以上のユーザーを用意し、最初のユーザーが２人目のユーザーをフォローしている状態を作ってみてください。
+4. 先ほどの演習を終えたら、active_relationship.followedの値とactive_relationship.followerの値を確認し、それぞれの値が正しいことを確認してみましょう。
+    - ```rb
+        irb(main):001:0> user1 = User.find(1)
+        (11.1ms)  SET NAMES utf8,  @@SESSION.sql_mode = CONCAT(CONCAT(@@sql_mode, ',STRICT_ALL_TABLES'), ',NO_AUTO_VALUE_ON_ZERO'),  @@SESSION.time_zone = 'Asia/Tokyo', @@SESSION.sql_auto_is_null = 0, @@SESSION.wait_timeout = 2147483
+        User Load (4.7ms)  SELECT  `users`.* FROM `users` WHERE `users`.`id` = 1 LIMIT 1
+        => #<User id: 1, name: "Example User", email: "example@railstutorial.org", created_at: "2023-11-02 09:15:07"...
+        irb(main):002:0> user2 = User.find(2)
+        User Load (6.2ms)  SELECT  `users`.* FROM `users` WHERE `users`.`id` = 2 LIMIT 1
+        => #<User id: 2, name: "Mr. Helmer Nitzsche", email: "example-1@railstutorial.org", created_at: "2023-11-02 ...
+        irb(main):003:0> active_relationship = user1.active_relationships.create(followed_id: user2.id)
+        (3.5ms)  BEGIN
+        User Load (5.3ms)  SELECT  `users`.* FROM `users` WHERE `users`.`id` = 1 LIMIT 1
+        User Load (3.0ms)  SELECT  `users`.* FROM `users` WHERE `users`.`id` = 2 LIMIT 1
+        SQL (15.9ms)  INSERT INTO `relationships` (`follower_id`, `followed_id`, `created_at`, `updated_at`) VALUES (1, 2, '2023-11-05 13:20:24', '2023-11-05 13:20:24')
+        (3.5ms)  COMMIT
+        => #<Relationship id: 1, follower_id: 1, followed_id: 2, created_at: "2023-11-05 04:20:24", updated_at: "202...
+        irb(main):004:0> active_relationship.followed
+        => #<User id: 2, name: "Mr. Helmer Nitzsche", email: "example-1@railstutorial.org", created_at: "2023-11-02 09:15:07", updated_at: "2023-11-02 09:15:07", password_digest: "$2a$10$SmwINAJ6QArEIq5nuCWB5OXTr6Xi14nBSkwgM40ajQa...", remember_digest: nil, admin: false, activation_digest: "$2a$10$9VjipLxZzvhj/VjbZ70kSuuGRGMH1QWzwO45SrhozHA...", activated: true, activated_at: "2023-11-02 09:15:07", reset_digest: nil, reset_sent_at: nil>
+        irb(main):005:0> active_relationship.follower
+        => #<User id: 1, name: "Example User", email: "example@railstutorial.org", created_at: "2023-11-02 09:15:07", updated_at: "2023-11-02 09:15:07", password_digest: "$2a$10$Q5/BuVqh/Ser3tzVOKY5E.ci0/fiRhqhgvir4XlypI0...", remember_digest: nil, admin: true, activation_digest: "$2a$10$V09iM2ZXNNso3ORm6MMBke7.x8mrITfP0nAj6jI4oOy...", activated: true, activated_at: "2023-11-02 09:15:07", reset_digest: "$2a$10$AJ6/9WmU6nH66d//FeGW.OBKWhx8USaM6Jh7XlvDv9U...", reset_sent_at: "2023-11-04 13:05:16">
+      ```
