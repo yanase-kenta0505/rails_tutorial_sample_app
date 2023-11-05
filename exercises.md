@@ -1813,3 +1813,42 @@
 5. リスト 14.5のバリデーションをコメントアウトしても、テストが成功したままになっていることを確認してみましょう。(以前のRailsのバージョンでは、このバリデーションが必須でしたが、Rails 5から必須ではなくなりました。今回はフォロー機能の実装を優先しますが、この手のバリデーションが省略されている可能性があることを頭の片隅で覚えておくと良いでしょう。)
     - 確認しました
 
+6. コンソールを開き、リスト 14.9のコードを順々に実行してみましょう。
+7. 先ほどの演習の各コマンド実行時の結果を見返してみて、実際にはどんなSQLが出力されたのか確認してみましょう。
+    - ```rb
+        irb(main):003:0> michael = User.find_by(name: "Michael Example")
+        (0.7ms)  SET NAMES utf8,  @@SESSION.sql_mode = CONCAT(CONCAT(@@sql_mode, ',STRICT_ALL_TABLES'), ',NO_AUTO_VALUE_ON_ZERO'),  @@SESSION.time_zone = 'Asia/Tokyo', @@SESSION.sql_auto_is_null = 0, @@SESSION.wait_timeout = 2147483
+        User Load (1.6ms)  SELECT  `users`.* FROM `users` WHERE `users`.`name` = 'Michael Example' LIMIT 1
+        irb(main):004:0> michael
+        => #<User id: 762146111, name: "Michael Example", email: "michael@example.com", created_at: "2023-11-05 10:17:16", updated_at: "2023-11-05 10:17:16", password_digest: "$2a$04$bfJA0o3YtslDOG.pOFdU.u.hdRm2x5WGp.dLSLb.vRs...", reset_digest: nil, reset_sent_at: nil>
+        irb(main):005:0> archer = User.find_by(name: "Sterling Archer")
+        User Load (3.3ms)  SELECT  `users`.* FROM `users` WHERE `users`.`name` = 'Sterling Archer' LIMIT 1
+        => #<User id: 950961012, name: "Sterling Archer", email: "duchess@example.gov", created_at: "2023-11-05 10:1...
+        irb(main):006:0> assert_not michael.following?(archer)
+        User Exists (4.2ms)  SELECT  1 AS one FROM `users` INNER JOIN `relationships` ON `users`.`id` = `relationships`.`followed_id` WHERE `relationships`.`follower_id` = 762146111 AND `users`.`id` = 950961012 LIMIT 1
+                1: from (irb):6
+        NoMethodError (undefined method `assert_not' for main:Object)
+        irb(main):007:0> michael.following?(archer) 
+        User Exists (4.1ms)  SELECT  1 AS one FROM `users` INNER JOIN `relationships` ON `users`.`id` = `relationships`.`followed_id` WHERE `relationships`.`follower_id` = 762146111 AND `users`.`id` = 950961012 LIMIT 1
+        => false
+        irb(main):008:0> michael.follow(archer)
+        (1.3ms)  BEGIN
+        User Load (3.3ms)  SELECT  `users`.* FROM `users` WHERE `users`.`id` = 762146111 LIMIT 1
+        SQL (2.6ms)  INSERT INTO `relationships` (`follower_id`, `followed_id`, `created_at`, `updated_at`) VALUES (762146111, 950961012, '2023-11-05 21:49:31', '2023-11-05 21:49:31')
+        (2.3ms)  COMMIT
+        User Load (7.4ms)  SELECT  `users`.* FROM `users` INNER JOIN `relationships` ON `users`.`id` = `relationships`.`followed_id` WHERE `relationships`.`follower_id` = 762146111 LIMIT 11
+        => #<ActiveRecord::Associations::CollectionProxy [#<User id: 950961012, name: "Sterling Archer", email: "duchess@example.gov", created_at: "2023-11-05 10:17:16", updated_at: "2023-11-05 10:17:16", password_digest: "$2a$04$066imyGfbh.As6c8mFxcUefkQW7wiu0bSRZ3D/3QQ4S...", remember_digest: nil, admin: false, activation_digest: nil, activated: true, activated_at: "2023-11-05 10:17:16", reset_digest: nil, reset_sent_at: nil>]>
+        irb(main):009:0> michael.following?(archer)
+        User Exists (2.8ms)  SELECT  1 AS one FROM `users` INNER JOIN `relationships` ON `users`.`id` = `relationships`.`followed_id` WHERE `relationships`.`follower_id` = 762146111 AND `users`.`id` = 950961012 LIMIT 1
+        => true
+        irb(main):010:0> michael.unfollow(archer)
+        Relationship Load (2.5ms)  SELECT  `relationships`.* FROM `relationships` WHERE `relationships`.`follower_id` = 762146111 AND `relationships`.`followed_id` = 950961012 LIMIT 1
+        (0.7ms)  BEGIN
+        SQL (2.2ms)  DELETE FROM `relationships` WHERE `relationships`.`id` = 2
+        (2.7ms)  COMMIT
+        => #<Relationship id: 2, follower_id: 762146111, followed_id: 950961012, created_at: "2023-11-05 12:49:31", updated_at: "2023-11-05 12:49:31">
+        irb(main):011:0> michael.following?(archer)
+        User Exists (2.8ms)  SELECT  1 AS one FROM `users` INNER JOIN `relationships` ON `users`.`id` = `relationships`.`followed_id` WHERE `relationships`.`follower_id` = 762146111 AND `users`.`id` = 950961012 LIMIT 1
+        => false
+    ```
+8. 
