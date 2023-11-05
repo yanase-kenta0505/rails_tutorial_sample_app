@@ -1871,3 +1871,17 @@
     - user.followers.to_a.countの実行結果と違っている箇所はありますか?
         - メモリの消費量に違いが出る
         - user.followers.count と user.followers.to_a.count の主な違いは、前者がデータベースレベルでカウントを行い、後者がRubyの配列操作を使用してカウントを行う点
+
+11. コンソールを開き、User.first.followers.countの結果がリスト 14.14で期待している結果と合致していることを確認してみましょう。
+12. 先ほどの演習と同様に、User.first.following.countの結果も合致していることを確認してみましょう。
+    - ```rb
+        irb(main):002:0> User.first.followers.count
+        (1.3ms)  SET NAMES utf8,  @@SESSION.sql_mode = CONCAT(CONCAT(@@sql_mode, ',STRICT_ALL_TABLES'), ',NO_AUTO_VALUE_ON_ZERO'),  @@SESSION.time_zone = 'Asia/Tokyo', @@SESSION.sql_auto_is_null = 0, @@SESSION.wait_timeout = 2147483
+        User Load (1.3ms)  SELECT  `users`.* FROM `users` ORDER BY `users`.`id` ASC LIMIT 1
+        (3.7ms)  SELECT COUNT(*) FROM `users` INNER JOIN `relationships` ON `users`.`id` = `relationships`.`follower_id` WHERE `relationships`.`followed_id` = 1
+        => 38
+        irb(main):003:0> User.first.following.count
+        User Load (5.0ms)  SELECT  `users`.* FROM `users` ORDER BY `users`.`id` ASC LIMIT 1
+        (8.7ms)  SELECT COUNT(*) FROM `users` INNER JOIN `relationships` ON `users`.`id` = `relationships`.`followed_id` WHERE `relationships`.`follower_id` = 1
+        => 49
+      ```
