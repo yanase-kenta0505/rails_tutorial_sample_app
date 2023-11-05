@@ -1443,6 +1443,14 @@
 
 # 第13章
 ## チェックシート
+1. この章で登場するdefault_scopeはどのようなものでしょうか？
+    - ある特定の順序でレコードを取得したい場合などに使用される
+2. マイクロポストモデルに指定した属性「dependent: :destroy」が表現しているものは何でしょうか？
+    - 親が削除されたら子も削除する
+    - Userが削除されたらMicropostも削除する
+3. なぜ画像の投稿機能にバリデーションを設けたのでしょうか？
+    - 不正なファイル形式のアップロードを防ぐ。
+    - アップロードされる画像のサイズが大きすぎることによるサーバーへの負荷を防ぐ。
 ## 演習
 1. RailsコンソールでMicropost.newを実行し、インスタンスを変数micropostに代入してください。その後、user_idに最初のユーザーのidを、contentに "Lorem ipsum" をそれぞれ代入してみてください。この時点では、 micropostオブジェクトのマジックカラム (created_atとupdated_at) には何が入っているでしょうか?
     - nil
@@ -1749,3 +1757,32 @@
 
 34. 本番環境で解像度の高い画像をアップロードし、適切にリサイズされているか確認してみましょう。長方形の画像であっても、適切にリサイズされていますか?
     - ここは飛ばします
+
+# 第14章
+## チェックシート
+## 演習
+1. 図 14.7のid=1のユーザーに対してuser.following.map(&:id)を実行すると、結果はどのようになるでしょうか? 想像してみてください。ヒント: 4.3.2で紹介したmap(&:method_name)のパターンを思い出してください。例えばuser.following.map(&:id)の場合、idの配列を返します。
+    - ```rb
+        irb(main):008:0> user = User.find(1)
+        User Load (3.6ms)  SELECT  `users`.* FROM `users` WHERE `users`.`id` = 1 LIMIT 1
+        => #<User id: 1, name: "Example User", email: "example@railstutorial.org", created_at: "2023-11-02 09:15:07",...
+        irb(main):009:0> following_ids = user.following.map(&:id)
+        Traceback (most recent call last):
+                1: from (irb):9
+        NoMethodError (undefined method `following' for #<User:0x0000000142336a60>)
+      ```
+2. 図 14.7を参考にして、id=2のユーザーに対してuser.followingを実行すると、結果はどのようになるでしょうか? また、同じユーザーに対してuser.following.map(&:id)を実行すると、結果はどのようになるでしょうか? 想像してみてください。
+    - ```rb
+        irb(main):010:0> user = User.find(2)
+        User Load (3.6ms)  SELECT  `users`.* FROM `users` WHERE `users`.`id` = 2 LIMIT 1
+        => #<User id: 2, name: "Mr. Helmer Nitzsche", email: "example-1@railstutorial.org", created_at: "2023-11-02 0...
+        irb(main):011:0> following_users = user.following
+        Traceback (most recent call last):
+                1: from (irb):11
+        NoMethodError (undefined method `following' for #<User:0x00000001143083a0>)
+        irb(main):012:0> following_ids = user.following.map(&:id)
+        Traceback (most recent call last):
+                2: from (irb):11
+                1: from (irb):12:in `rescue in irb_binding'
+        NoMethodError (undefined method `following' for #<User:0x00000001143083a0>)
+      ```
