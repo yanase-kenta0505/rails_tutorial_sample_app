@@ -1787,7 +1787,8 @@
         NoMethodError (undefined method `following' for #<User:0x00000001143083a0>)
       ```
 3. コンソールを開き、表 14.1のcreateメソッドを使ってActiveRelationshipを作ってみましょう。データベース上に２人以上のユーザーを用意し、最初のユーザーが２人目のユーザーをフォローしている状態を作ってみてください。
-4. 先ほどの演習を終えたら、active_relationship.followedの値とactive_relationship.followerの値を確認し、それぞれの値が正しいことを確認してみましょう。
+4. 先ほどの演習を終えたら、active_relationship.followedの値とactive_re
+    lationship.followerの値を確認し、それぞれの値が正しいことを確認してみましょう。
     - ```rb
         irb(main):001:0> user1 = User.find(1)
         (11.1ms)  SET NAMES utf8,  @@SESSION.sql_mode = CONCAT(CONCAT(@@sql_mode, ',STRICT_ALL_TABLES'), ',NO_AUTO_VALUE_ON_ZERO'),  @@SESSION.time_zone = 'Asia/Tokyo', @@SESSION.sql_auto_is_null = 0, @@SESSION.wait_timeout = 2147483
@@ -1808,3 +1809,7 @@
         irb(main):005:0> active_relationship.follower
         => #<User id: 1, name: "Example User", email: "example@railstutorial.org", created_at: "2023-11-02 09:15:07", updated_at: "2023-11-02 09:15:07", password_digest: "$2a$10$Q5/BuVqh/Ser3tzVOKY5E.ci0/fiRhqhgvir4XlypI0...", remember_digest: nil, admin: true, activation_digest: "$2a$10$V09iM2ZXNNso3ORm6MMBke7.x8mrITfP0nAj6jI4oOy...", activated: true, activated_at: "2023-11-02 09:15:07", reset_digest: "$2a$10$AJ6/9WmU6nH66d//FeGW.OBKWhx8USaM6Jh7XlvDv9U...", reset_sent_at: "2023-11-04 13:05:16">
       ```
+
+5. リスト 14.5のバリデーションをコメントアウトしても、テストが成功したままになっていることを確認してみましょう。(以前のRailsのバージョンでは、このバリデーションが必須でしたが、Rails 5から必須ではなくなりました。今回はフォロー機能の実装を優先しますが、この手のバリデーションが省略されている可能性があることを頭の片隅で覚えておくと良いでしょう。)
+    - 確認しました
+
