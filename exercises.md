@@ -821,3 +821,253 @@
         Finished in 0.36492s
         30 tests, 76 assertions, 1 failures, 0 errors, 0 skips
       ```
+
+# 第10章
+## チェックシート
+1. ウェブアプリケーションでの認証と認可の違いはなんでしょうか？
+    - 認証
+        - ユーザーが自分自身を証明するプロセス
+        - ログインなど
+    - 認可
+        - 認証されたユーザーが特定のリソースにアクセスしたり、特定の操作を行えるかどうかを確認するプロセス
+「ユーザー」という単語を用いて説明してください。
+2. 特定のアクションが実行される直前にメソッドを呼び出すことができ、今回の章で認可 (アクセス制御) を実現しているものはなんでしょうか？
+    - `before_action`
+3. 今回の章の変更で、Userモデルはどのような構造になったでしょうか？
+    - admin（管理者）フラグを持つようになった
+## 演習
+1. 先ほど触れたように、target="_blank"で新しいページを開くときには、セキュリティ上の小さな問題があります。それは、リンク先のサイトがHTMLドキュメントのwindowオブジェクトを扱えてしまう、という点です。具体的には、フィッシング (Phising) サイトのような、悪意のあるコンテンツを導入させられてしまう可能性があります。Gravatarのような著名なサイトではこのような事態は起こらないと思いますが、念のため、このセキュリティ上のリスクも排除しておきましょう。対処方法は、リンク用のaタグのrel (relationship) 属性に、"noopener"と設定するだけです。早速、リスト 10.2で使ったGravatarの編集ページへのリンクにこの設定をしてみましょう。
+    - ```
+        <a href="http://gravatar.com/emails" target="_blank" rel="noopener">change</a>
+      ```
+2. リスト 10.5のパーシャルを使って、new.html.erbビュー (リスト 10.6) とedit.html.erbビュー (リスト 10.7) をリファクタリングしてみましょう (コードの重複を取り除いてみましょう)。ヒント: 3.4.3で使ったprovideメソッドを使うと、重複を取り除けます3 。(関連するリスト 7.27の演習課題を既に解いている場合、この演習課題をうまく解けない可能性があります。うまく解けない場合は、既存のコードのどこに差異があるのか考えながらこの課題に取り組んでみましょう。例えば筆者であれば、リスト 10.5で用いた変数を渡すテクニックを使って、リスト 10.6やリスト 10.7で必要になるURLをリスト 10.5に渡してみるでしょう。)
+    - https://github.com/yanase-kenta0505/rails_tutorial_sample_app/commit/e7e4d0bdf2a5fe5057a2207e8ce1d91c4fe05988
+
+3. 編集フォームから有効でないユーザー名やメールアドレス、パスワードを使って送信した場合、編集に失敗することを確認してみましょう。
+    - ![](images/2023-10-30-12-26-31.png)
+
+4. リスト 10.9のテストに１行追加し、正しい数のエラーメッセージが表示されているかテストしてみましょう。ヒント: 表 5.2で紹介したassert_selectを使ってalertクラスのdivタグを探しだし、「The form contains 4 errors.」というテキストを精査してみましょう。
+    - ```rb
+        test "unsuccessful edit" do
+            get edit_user_path(@user)
+            assert_template 'users/edit'
+            patch user_path(@user), params: { user: { name:  "",
+                                                    email: "foo@invalid",
+                                                    password:              "foo",
+                                                    password_confirmation: "bar" } }
+
+            assert_template 'users/edit'
+            assert_select 'div.alert', "The form contains 4 errors."
+        end
+      ```
+
+5. 実際に編集が成功するかどうか、有効な情報を送信して確かめてみましょう。
+    - 編集は成功しました。
+6. もしGravatarと紐付いていない適当なメールアドレス (foobar@example.comなど) に変更した場合、プロフィール画像はどのように表示されるでしょうか? 実際に編集フォームからメールアドレスを変更して、確認してみましょう。
+    - ![](images/2023-10-30-13-58-39.png)
+
+7. デフォルトのbeforeフィルターは、すべてのアクションに対して制限を加えます。今回のケースだと、ログインページやユーザー登録ページにも制限の範囲が及んでしまうはずです (結果としてテストも失敗するはずです)。リスト 10.15のonly:オプションをコメントアウトしてみて、テストスイートがそのエラーを検知できるかどうか (テストが失敗するかどうか) 確かめてみましょう。
+    - ```sh
+        rails test
+        Started with run options --seed 50598
+
+        FAIL["test_should_get_new", UsersControllerTest, 0.3055729998741299]
+        test_should_get_new#UsersControllerTest (0.31s)
+                Expected response to be a <2XX: success>, but was a <302: Found> redirect to <http://www.example.com/login>
+                Response body: <html><body>You are being <a href="http://www.example.com/login">redirected</a>.</body></html>
+                test/controllers/users_controller_test.rb:10:in `block in <class:UsersControllerTest>'
+
+        FAIL["test_layout_links", SiteLayoutTest, 0.38484900002367795]
+        test_layout_links#SiteLayoutTest (0.38s)
+                Expected at least 1 element matching "title", found 0.
+                Expected 0 to be >= 1.
+                test/integration/site_layout_test.rb:15:in `block in <class:SiteLayoutTest>'
+
+        FAIL["test_invalid_signup_information", UsersSignupTest, 0.3901680000126362]
+        test_invalid_signup_information#UsersSignupTest (0.39s)
+                expecting <"users/new"> but rendering with <[]>
+                test/integration/users_signup_test.rb:13:in `block in <class:UsersSignupTest>'
+
+        FAIL["test_valid_signup_information", UsersSignupTest, 0.3955779999960214]
+        test_valid_signup_information#UsersSignupTest (0.40s)
+                "User.count" didn't change by 1.
+                Expected: 2
+                Actual: 1
+                test/integration/users_signup_test.rb:31:in `block in <class:UsersSignupTest>'
+
+        FAIL["test_valid_signup_information_with_assert_select", UsersSignupTest, 0.40041100000962615]
+        test_valid_signup_information_with_assert_select#UsersSignupTest (0.40s)
+                "User.count" didn't change by 1.
+                Expected: 2
+                Actual: 1
+                test/integration/users_signup_test.rb:18:in `block in <class:UsersSignupTest>'
+
+        34/34: [====================================================================] 100% Time: 00:00:00, Time: 00:00:00
+
+        Finished in 0.40061s
+        34 tests, 85 assertions, 5 failures, 0 errors, 0 skips
+      ```
+8. 何故editアクションとupdateアクションを両方とも保護する必要があるのでしょうか? 考えてみてください。
+    - edit
+        - 不正なユーザーが他のユーザーのプロフィール編集ページを表示できてしまうから
+    - update
+        - 不正がユーザーが他のユーザーの情報を更新できてしまうから
+9. 上記のアクションのうち、どちらがブラウザで簡単にテストできるアクションでしょうか?
+    - edit
+        - URLを直接入力すれば編集ページへアクセスできるから
+
+10. フレンドリーフォワーディングで、渡されたURLに初回のみ転送されていることを、テストを書いて確認してみましょう。次回以降のログインのときには、転送先のURLはデフォルト (プロフィール画面) に戻っている必要があります。ヒント: リスト 10.29のsession[:forwarding_url]が正しい値かどうか確認するテストを追加してみましょう。
+    - ```rb
+        test "friendly forwarding, forwarded only the first time to the URL passed" do
+            get edit_user_path(@user)
+            log_in_as(@user)
+            assert_redirected_to edit_user_url(@user)
+            follow_redirect!
+            assert_template 'users/edit'
+            
+            # ログアウトして再度ログイン
+            delete logout_path
+            log_in_as(@user)
+            assert_redirected_to @user
+            follow_redirect!
+            assert_template 'users/show'
+        end
+      ```
+11. 7.1.3で紹介したdebuggerメソッドをSessionsコントローラのnewアクションに置いてみましょう。その後、ログアウトして /users/1/edit にアクセスしてみてください (デバッガーが途中で処理を止めるはずです)。ここでコンソールに移り、session[:forwarding_url]の値が正しいかどうか確認してみましょう。また、newアクションにアクセスしたときのrequest.get?の値も確認してみましょう (デバッガーを使っていると、ときどき予期せぬ箇所でターミナルが止まったり、おかしい挙動を見せたりします。熟練の開発者になった気になって (コラム 1.2)、落ち着いて対処してみましょう)。
+    - ```sh
+        (byebug) session[:forwarding_url]
+        "http://localhost:3000/users/1/edit"
+        (byebug) request.get?
+        true
+      ```
+
+12. レイアウトにあるすべてのリンクに対して統合テストを書いてみましょう。ログイン済みユーザーとそうでないユーザーのそれぞれに対して、正しい振る舞いを考えてください。ヒント: log_in_asヘルパーを使ってリスト 5.32にテストを追加してみましょう。
+    - https://github.com/yanase-kenta0505/rails_tutorial_sample_app/commit/a64307b9d33586a85ca3dce539bc423bfea8becb
+
+13. 試しに他人の編集ページにアクセスしてみて、10.2.2で実装したようにリダイレクトされるかどうかを確かめてみましょう。
+    - 確認しました。
+
+14. Railsコンソールを開き、pageオプションにnilをセットして実行すると、１ページ目のユーザーが取得できることを確認してみましょう。
+    - ```sh
+        irb(main):008:0> user = User.paginate(page: nil)
+        User Load (6.8ms)  SELECT  `users`.* FROM `users` LIMIT 11 OFFSET 0
+        (3.5ms)  SELECT COUNT(*) FROM `users`
+        => #<ActiveRecord::Relation [#<User id: 1, name: "Example User", email: "example@railstutorial.org", cr...
+        irb(main):013:0> user
+        User Load (5.5ms)  SELECT  `users`.* FROM `users` LIMIT 11 OFFSET 0
+        (1.9ms)  SELECT COUNT(*) FROM `users`
+        => #<ActiveRecord::Relation [#<User id: 1, name: "Example User", email: "example@railstutorial.org", created_at: "2023-10-31 01:10:46", updated_at: "2023-10-31 01:10:46", password_digest: "$2a$10$oX3r/xUvfLQb9.WngNcE0eeY04pChiqCbok93A.WX41...", remember_digest: nil>, #<User id: 2, name: "Zachery Daniel", email: "example-1@railstutorial.org", created_at: "2023-10-31 01:10:47", updated_at: "2023-10-31 01:10:47", password_digest: "$2a$10$m00PVq15/H5mDjz5dxZWmOVucf8TyrnqyxjYyuQWyXH...", remember_digest: nil>, #<User id: 3, name: "Elbert McCullough", email: "example-2@railstutorial.org", created_at: "2023-10-31 01:10:47", updated_at: "2023-10-31 01:10:47", password_digest: "$2a$10$dJLtQH9P5HygowJEpQdM6.f9ZCOtJs0E3podpvXsrP4...", remember_digest: nil>, #<User id: 4, name: "Horace Jaskolski", email: "example-3@railstutorial.org", created_at: "2023-10-31 01:10:47", updated_at: "2023-10-31 01:10:47", password_digest: "$2a$10$Y2YCwP6tXbfkXJEJYY5md.zqON4TvmCKkxa4x9nfJ7A...", remember_digest: nil>, #<User id: 5, name: "Jose Emmerich", email: "example-4@railstutorial.org", created_at: "2023-10-31 01:10:47", updated_at: "2023-10-31 01:10:47", password_digest: "$2a$10$FD6BcwhV7nJkJGLGUvZbDuHAGiSnt4iHA4a5pj0aMu3...", remember_digest: nil>, #<User id: 6, name: "Nick Huel", email: "example-5@railstutorial.org", created_at: "2023-10-31 01:10:47", updated_at: "2023-10-31 01:10:47", password_digest: "$2a$10$AVYrG5Oq2FanxC9iPXeZC.ExSvWdR/9/jnUC9LDcHdE...", remember_digest: nil>, #<User id: 7, name: "Federico Abernathy", email: "example-6@railstutorial.org", created_at: "2023-10-31 01:10:47", updated_at: "2023-10-31 01:10:47", password_digest: "$2a$10$MqfFQNI/Nv3UL0IaJqeOI.77F7gWAk2/uPbQmVt12bS...", remember_digest: nil>, #<User id: 8, name: "Bert Waelchi", email: "example-7@railstutorial.org", created_at: "2023-10-31 01:10:47", updated_at: "2023-10-31 01:10:47", password_digest: "$2a$10$l8valFjY07soVJeCkmW8U.pN5XQbDMNqpcH.igr2rPs...", remember_digest: nil>, #<User id: 9, name: "Janice Cummerata IV", email: "example-8@railstutorial.org", created_at: "2023-10-31 01:10:47", updated_at: "2023-10-31 01:10:47", password_digest: "$2a$10$yhGBPeY6ncu1wUHmlDzEvOnCNW0zTWqKlP4ZUOsFULJ...", remember_digest: nil>, #<User id: 10, name: "Kelli Hartmann", email: "example-9@railstutorial.org", created_at: "2023-10-31 01:10:47", updated_at: "2023-10-31 01:10:47", password_digest: "$2a$10$X9qzRP7/AagF/J4OP9y67Ok2CX9q.CxdBP6mCOUQWNC...", remember_digest: nil>, ...]>
+        irb(main):014:0> 
+      ```
+15. 先ほどの演習課題で取得したpaginationオブジェクトは、何クラスでしょうか? また、User.allのクラスとどこが違うでしょうか? 比較してみてください。
+    - ActiveRecord_Relation
+    - paginationオブジェクトはページネーションに関連する追加メソッドを使用することができる
+
+16. 試しにリスト 10.45にあるページネーションのリンク (will_paginateの部分) を２つともコメントアウトしてみて、リスト 10.48のテストが redに変わるかどうか確かめてみましょう。
+17. 先ほどは２つともコメントアウトしましたが、１つだけコメントアウトした場合、テストが greenのままであることを確認してみましょう。will_paginateのリンクが２つとも存在していることをテストしたい場合は、どのようなテストを追加すれば良いでしょうか? ヒント: 表 5.2を参考にして、数をカウントするテストを追加してみましょう。
+    - ```sh
+        rails test
+            Started with run options --seed 2383
+
+            FAIL["test_index_including_pagination", UsersIndexTest, 0.43116199993528426]
+            test_index_including_pagination#UsersIndexTest (0.43s)
+                    Expected at least 1 element matching "div.pagination", found 0.
+                    Expected 0 to be >= 1.
+                    test/integration/users_index_test.rb:13:in `block in <class:UsersIndexTest>'
+
+            40/40: [===================================================================================================================================] 100% Time: 00:00:00, Time: 00:00:00
+
+            Finished in 0.74546s
+            40 tests, 114 assertions, 1 failures, 0 errors, 0 skips
+
+            claves@clavesnoMacBook-Air sample_app % k
+            zsh: command not found: k
+            claves@clavesnoMacBook-Air sample_app % rails test
+            Started with run options --seed 35961
+
+            40/40: [===================================================================================================================================] 100% Time: 00:00:00, Time: 00:00:00
+
+            Finished in 0.67100s
+            40 tests, 144 assertions, 0 failures, 0 errors, 0 skips
+
+            claves@clavesnoMacBook-Air sample_app % rails test
+            Started with run options --seed 3497
+
+            FAIL["test_index_including_pagination", UsersIndexTest, 0.6241939999163151]
+            test_index_including_pagination#UsersIndexTest (0.62s)
+                    Expected exactly 2 elements matching "div.pagination", found 1.
+                    Expected: 2
+                    Actual: 1
+                    test/integration/users_index_test.rb:13:in `block in <class:UsersIndexTest>'
+
+            40/40: [===============================================================================================] 100% Time: 00:00:00, Time: 00:00:00
+
+            Finished in 0.87755s
+            40 tests, 114 assertions, 1 failures, 0 errors, 0 skips
+      ```
+
+      - ```
+        test "index including pagination" do
+            log_in_as(@user)
+            get users_path
+            assert_template 'users/index'
+            assert_select 'div.pagination', count: 2
+            User.paginate(page: 1).each do |user|
+            assert_select 'a[href=?]', user_path(user), text: user.name
+            end
+        end
+        ```
+
+18. リスト 10.52にあるrenderの行をコメントアウトし、テストの結果が redに変わることを確認してみましょう。
+    - ```sh
+        rails test
+        Started with run options --seed 38576
+
+        FAIL["test_index_including_pagination", UsersIndexTest, 0.6258310000412166]
+        test_index_including_pagination#UsersIndexTest (0.63s)
+                Expected at least 1 element matching "a[href=\"/users/14035331\"]", found 0.
+                Expected 0 to be >= 1.
+                test/integration/users_index_test.rb:15:in `block (2 levels) in <class:UsersIndexTest>'
+                test/integration/users_index_test.rb:14:in `block in <class:UsersIndexTest>'
+
+        40/40: [======================================================================] 100% Time: 00:00:00, Time: 00:00:00
+
+        Finished in 0.84203s
+        40 tests, 115 assertions, 1 failures, 0 errors, 0 skips
+      ```
+
+19. Web経由でadmin属性を変更できないことを確認してみましょう。具体的には、リスト 10.56に示したように、PATCHを直接ユーザーのURL (/users/:id) に送信するテストを作成してみてください。テストが正しい振る舞いをしているかどうか確信を得るために、まずはadminをuser_paramsメソッド内の許可されたパラメータ一覧に追加するところから始めてみましょう。最初のテストの結果は redになるはずです。
+    - 確認しました。
+
+20. 管理者ユーザーとしてログインし、試しにサンプルユーザを２〜３人削除してみましょう。ユーザーを削除すると、Railsサーバーのログにはどのような情報が表示されるでしょうか?
+    - ```sh
+        Started DELETE "/users/2" for 192.168.65.1 at 2023-10-31 08:55:21 +0000
+        sample_app-web-1  | Cannot render console from 192.168.65.1! Allowed networks: 127.0.0.1, ::1, 127.0.0.0/127.255.255.255
+        sample_app-web-1  | Processing by UsersController#destroy as HTML
+        sample_app-web-1  |   Parameters: {"authenticity_token"=>"pc/KtKVH/UFrSVnplSiUNM1NpLKg3A0d7os2bDKHEnizc1aj493Vz6874RZ7Ba5LwjqwLnB7t2lZg2icSZKIjw==", "id"=>"2"}
+        sample_app-web-1  |   User Load (1.6ms)  SELECT  `users`.* FROM `users` WHERE `users`.`id` = 1 LIMIT 1
+        sample_app-web-1  |   User Load (1.1ms)  SELECT  `users`.* FROM `users` WHERE `users`.`id` = 2 LIMIT 1
+        sample_app-web-1  |    (0.3ms)  BEGIN
+        sample_app-web-1  |   SQL (1.8ms)  DELETE FROM `users` WHERE `users`.`id` = 2
+        sample_app-web-1  |    (2.5ms)  COMMIT
+        sample_app-web-1  | Redirected to http://localhost:3000/users
+        sample_app-web-1  | Completed 302 Found in 13ms (ActiveRecord: 7.3ms)
+      ```
+
+21. 試しにリスト 10.59にある管理者ユーザーのbeforeフィルターをコメントアウトしてみて、テストの結果が redに変わることを確認してみましょう。
+    - ```sh
+        rails test
+        Started with run options --seed 20027
+
+        FAIL["test_should_redirect_destroy_when_logged_in_as_a_non-admin", UsersControllerTest, 0.37505499995313585]
+        test_should_redirect_destroy_when_logged_in_as_a_non-admin#UsersControllerTest (0.38s)
+                "User.count" didn't change by 0.
+                Expected: 34
+                Actual: 33
+                test/controllers/users_controller_test.rb:66:in `block in <class:UsersControllerTest>'
+
+        44/44: [======================================================================] 100% Time: 00:00:00, Time: 00:00:00
+
+        Finished in 0.80902s
+        44 tests, 180 assertions, 1 failures, 0 errors, 0 skips
+      ```
