@@ -2024,3 +2024,71 @@
         sample_app-web-1  |   Rendered relationships/destroy.js.erb (8.1ms)
         sample_app-web-1  | Completed 200 OK in 52ms (Views: 18.5ms | ActiveRecord: 16.4ms)
       ```
+
+22. リスト 14.36のrespond_toブロック内の各行を順にコメントアウトしていき、テストが正しくエラーを検知できるかどうか確認してみましょう。実際、どのテストケースが落ちたでしょうか?
+    - create側
+        - `format.html { redirect_to @user }`をコメントアウト
+            - ```rb
+            claves@clavesnoMacBook-Air sample_app % rails test
+            Started with run options --seed 50117
+
+            ERROR["test_should_follow_a_user_the_standard_way", FollowingTest, 1.9014809997752309]
+            test_should_follow_a_user_the_standard_way#FollowingTest (1.90s)
+            ActionController::UnknownFormat:         ActionController::UnknownFormat: ActionController::UnknownFormat
+                        app/controllers/relationships_controller.rb:7:in `create'
+                        test/integration/following_test.rb:31:in `block (2 levels) in <class:FollowingTest>'
+                        test/integration/following_test.rb:30:in `block in <class:FollowingTest>'
+
+            76/76: [==================================================================] 100% Time: 00:00:01, Time: 00:00:01
+
+            Finished in 1.99055s
+            76 tests, 398 assertions, 0 failures, 1 errors, 0 skips
+          ```
+        - `format.js`をコメントアウト
+            - ```rb
+                claves@clavesnoMacBook-Air sample_app % rails test
+                Started with run options --seed 53160
+
+                ERROR["test_should_follow_a_user_the_standard_way", FollowingTest, 2.3857260001823306]
+                test_should_follow_a_user_the_standard_way#FollowingTest (2.39s)
+                ActionController::UnknownFormat:         ActionController::UnknownFormat: ActionController::UnknownFormat
+                            app/controllers/relationships_controller.rb:7:in `create'
+                            test/integration/following_test.rb:31:in `block (2 levels) in <class:FollowingTest>'
+                            test/integration/following_test.rb:30:in `block in <class:FollowingTest>'
+
+                ERROR["test_should_follow_a_user_with_Ajax", FollowingTest, 2.523993000155315]
+                test_should_follow_a_user_with_Ajax#FollowingTest (2.52s)
+                ActionController::UnknownFormat:         ActionController::UnknownFormat: ActionController::UnknownFormat
+                            app/controllers/relationships_controller.rb:7:in `create'
+                            test/integration/following_test.rb:37:in `block (2 levels) in <class:FollowingTest>'
+                            test/integration/following_test.rb:36:in `block in <class:FollowingTest>'
+
+                76/76: [==================================================================] 100% Time: 00:00:02, Time: 00:00:02
+
+                Finished in 2.63607s
+                76 tests, 397 assertions, 0 failures, 2 errors, 0 skips
+              ```
+22. リスト 14.40のxhr: trueがある行のうち、片方のみを削除するとどういった結果になるでしょうか? このとき発生する問題の原因と、なぜ先ほどの演習で確認したテストがこの問題を検知できたのか考えてみてください。
+    - 結果
+        - ```rb
+            claves@clavesnoMacBook-Air sample_app % rails test
+            Started with run options --seed 3725
+
+            FAIL["test_should_unfollow_a_user_with_Ajax", FollowingTest, 1.9850830000359565]
+            test_should_unfollow_a_user_with_Ajax#FollowingTest (1.99s)
+                    "@user.following.count" didn't change by -1.
+                    Expected: 2
+                    Actual: 3
+                    test/integration/following_test.rb:52:in `block in <class:FollowingTest>'
+
+            76/76: [==================================================================] 100% Time: 00:00:02, Time: 00:00:02
+
+            Finished in 2.54222s
+            76 tests, 399 assertions, 1 failures, 0 errors, 0 skips
+          ```
+
+    - 原因
+        - Ajaxリクエストとして送信されるべきリクエストが通常のHTTPリクエストとして扱われることになる。これにより、コントローラが期待するformat.jsの代わりにformat.htmlを探すことになり、テストが失敗する。
+
+    - 問題を検知できた理由
+        - テストがAjaxリクエストに対する適切な応答を期待しているから。

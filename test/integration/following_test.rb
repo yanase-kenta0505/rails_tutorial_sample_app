@@ -50,7 +50,6 @@ class FollowingTest < ActionDispatch::IntegrationTest
     @user.follow(@other)
     relationship = @user.active_relationships.find_by(followed_id: @other.id)
     assert_difference '@user.following.count', -1 do
-      delete relationship_path(relationship), xhr: true
     end
   end
 end
