@@ -2092,3 +2092,14 @@
 
     - 問題を検知できた理由
         - テストがAjaxリクエストに対する適切な応答を期待しているから。
+
+23. マイクロポストのidが正しく並んでいると仮定して (すなわち若いidの投稿ほど古くなる前提で)、図 14.22のデータセットでuser.feed.map(&:id)を実行すると、どのような結果が表示されるでしょうか? 考えてみてください。ヒント: 13.1.4で実装したdefault_scopeを思い出してください。
+    - ```rb
+        irb(main):001:0> user = User.first
+        (1.1ms)  SET NAMES utf8,  @@SESSION.sql_mode = CONCAT(CONCAT(@@sql_mode, ',STRICT_ALL_TABLES'), ',NO_AUTO_VALUE_ON_ZERO'),  @@SESSION.time_zone = 'Asia/Tokyo', @@SESSION.sql_auto_is_null = 0, @@SESSION.wait_timeout = 2147483
+        User Load (1.3ms)  SELECT  `users`.* FROM `users` ORDER BY `users`.`id` ASC LIMIT 1
+        => #<User id: 1, name: "Example User", email: "example@railstutorial.org", created_at: "2023-11-05 13:16:54"...
+        irb(main):002:0> ids = user.feed.map(&:id)
+        Micropost Load (7.4ms)  SELECT `microposts`.* FROM `microposts` WHERE (user_id = 1) ORDER BY `microposts`.`created_at` DESC
+        => [295, 289, 283, 277, 271, 265, 259, 253, 247, 241, 235, 229, 223, 217, 211, 205, 199, 193, 187, 181, 175,...]
+      ```
