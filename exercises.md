@@ -1985,3 +1985,42 @@
         sample_app-web-1  |   Rendered layouts/_footer.html.erb (0.2ms)
         sample_app-web-1  | Completed 200 OK in 83ms (Views: 69.6ms | ActiveRecord: 9.4ms)
       ```
+20. ブラウザから /users/2 にアクセスし、うまく動いているかどうか確認してみましょう。
+    - うまく動作しています。
+21. 先ほどの演習で確認が終わったら、Railsサーバーのログを閲覧し、フォロー/フォロー解除を実行した直後のテンプレートがどうなっているか確認してみましょう。
+    - ```rb
+        sample_app-web-1  | Started POST "/relationships" for 192.168.65.1 at 2023-11-06 15:47:36 +0900
+        sample_app-web-1  | Cannot render console from 192.168.65.1! Allowed networks: 127.0.0.1, ::1, 127.0.0.0/127.255.255.255
+        sample_app-web-1  | Processing by RelationshipsController#create as JS
+        sample_app-web-1  |   Parameters: {"utf8"=>"✓", "followed_id"=>"2", "commit"=>"Follow"}
+        sample_app-web-1  |   User Load (6.0ms)  SELECT  `users`.* FROM `users` WHERE `users`.`id` = 1 LIMIT 1
+        sample_app-web-1  |   User Load (1.3ms)  SELECT  `users`.* FROM `users` WHERE `users`.`id` = 2 LIMIT 1
+        sample_app-web-1  |    (0.3ms)  BEGIN
+        sample_app-web-1  |   CACHE User Load (0.0ms)  SELECT  `users`.* FROM `users` WHERE `users`.`id` = 1 LIMIT 1  [["id", 1], ["LIMIT", 1]]
+        sample_app-web-1  |   SQL (2.9ms)  INSERT INTO `relationships` (`follower_id`, `followed_id`, `created_at`, `updated_at`) VALUES (1, 2, '2023-11-06 15:47:36', '2023-11-06 15:47:36')
+        sample_app-web-1  |    (2.3ms)  COMMIT
+        sample_app-web-1  |   Rendering relationships/create.js.erb
+        sample_app-web-1  |   Relationship Load (1.2ms)  SELECT  `relationships`.* FROM `relationships` WHERE `relationships`.`follower_id` = 1 AND `relationships`.`followed_id` = 2 LIMIT 1
+        sample_app-web-1  |   Rendered users/_unfollow.html.erb (2.8ms)
+        sample_app-web-1  |    (1.6ms)  SELECT COUNT(*) FROM `users` INNER JOIN `relationships` ON `users`.`id` = `relationships`.`follower_id` WHERE `relationships`.`followed_id` = 2
+        sample_app-web-1  |   Rendered relationships/create.js.erb (10.3ms)
+        sample_app-web-1  | Completed 200 OK in 52ms (Views: 18.5ms | ActiveRecord: 15.5ms)
+        sample_app-web-1  |
+        sample_app-web-1  |
+        sample_app-web-1  | Started DELETE "/relationships/90" for 192.168.65.1 at 2023-11-06 15:47:38 +0900
+        sample_app-web-1  | Cannot render console from 192.168.65.1! Allowed networks: 127.0.0.1, ::1, 127.0.0.0/127.255.255.255
+        sample_app-web-1  | Processing by RelationshipsController#destroy as JS
+        sample_app-web-1  |   Parameters: {"utf8"=>"✓", "commit"=>"Unfollow", "id"=>"90"}
+        sample_app-web-1  |   User Load (5.1ms)  SELECT  `users`.* FROM `users` WHERE `users`.`id` = 1 LIMIT 1
+        sample_app-web-1  |   Relationship Load (3.2ms)  SELECT  `relationships`.* FROM `relationships` WHERE `relationships`.`id` = 90 LIMIT 1
+        sample_app-web-1  |   User Load (1.4ms)  SELECT  `users`.* FROM `users` WHERE `users`.`id` = 2 LIMIT 1
+        sample_app-web-1  |   Relationship Load (1.1ms)  SELECT  `relationships`.* FROM `relationships` WHERE `relationships`.`follower_id` = 1 AND `relationships`.`followed_id` = 2 LIMIT 1
+        sample_app-web-1  |    (0.3ms)  BEGIN
+        sample_app-web-1  |   SQL (1.6ms)  DELETE FROM `relationships` WHERE `relationships`.`id` = 90
+        sample_app-web-1  |    (2.3ms)  COMMIT
+        sample_app-web-1  |   Rendering relationships/destroy.js.erb
+        sample_app-web-1  |   Rendered users/_follow.html.erb (0.9ms)
+        sample_app-web-1  |    (1.4ms)  SELECT COUNT(*) FROM `users` INNER JOIN `relationships` ON `users`.`id` = `relationships`.`follower_id` WHERE `relationships`.`followed_id` = 2
+        sample_app-web-1  |   Rendered relationships/destroy.js.erb (8.1ms)
+        sample_app-web-1  | Completed 200 OK in 52ms (Views: 18.5ms | ActiveRecord: 16.4ms)
+      ```
