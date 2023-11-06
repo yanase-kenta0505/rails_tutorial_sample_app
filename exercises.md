@@ -2068,7 +2068,7 @@
                 Finished in 2.63607s
                 76 tests, 397 assertions, 0 failures, 2 errors, 0 skips
               ```
-22. リスト 14.40のxhr: trueがある行のうち、片方のみを削除するとどういった結果になるでしょうか? このとき発生する問題の原因と、なぜ先ほどの演習で確認したテストがこの問題を検知できたのか考えてみてください。
+23. リスト 14.40のxhr: trueがある行のうち、片方のみを削除するとどういった結果になるでしょうか? このとき発生する問題の原因と、なぜ先ほどの演習で確認したテストがこの問題を検知できたのか考えてみてください。
     - 結果
         - ```rb
             claves@clavesnoMacBook-Air sample_app % rails test
@@ -2093,7 +2093,7 @@
     - 問題を検知できた理由
         - テストがAjaxリクエストに対する適切な応答を期待しているから。
 
-23. マイクロポストのidが正しく並んでいると仮定して (すなわち若いidの投稿ほど古くなる前提で)、図 14.22のデータセットでuser.feed.map(&:id)を実行すると、どのような結果が表示されるでしょうか? 考えてみてください。ヒント: 13.1.4で実装したdefault_scopeを思い出してください。
+24. マイクロポストのidが正しく並んでいると仮定して (すなわち若いidの投稿ほど古くなる前提で)、図 14.22のデータセットでuser.feed.map(&:id)を実行すると、どのような結果が表示されるでしょうか? 考えてみてください。ヒント: 13.1.4で実装したdefault_scopeを思い出してください。
     - ```rb
         irb(main):001:0> user = User.first
         (1.1ms)  SET NAMES utf8,  @@SESSION.sql_mode = CONCAT(CONCAT(@@sql_mode, ',STRICT_ALL_TABLES'), ',NO_AUTO_VALUE_ON_ZERO'),  @@SESSION.time_zone = 'Asia/Tokyo', @@SESSION.sql_auto_is_null = 0, @@SESSION.wait_timeout = 2147483
@@ -2103,3 +2103,38 @@
         Micropost Load (7.4ms)  SELECT `microposts`.* FROM `microposts` WHERE (user_id = 1) ORDER BY `microposts`.`created_at` DESC
         => [295, 289, 283, 277, 271, 265, 259, 253, 247, 241, 235, 229, 223, 217, 211, 205, 199, 193, 187, 181, 175,...]
       ```
+
+25. リスト 14.44において、現在のユーザー自身の投稿を含めないようにするにはどうすれば良いでしょうか? また、そのような変更を加えると、リスト 14.42のどのテストが失敗するでしょうか?
+    - ```rb
+        Micropost.where("user_id IN (?)", following_ids)
+      ```
+
+   - 失敗するテスト
+    - ```rb
+        # 自分自身の投稿を確認
+        michael.microposts.each do |post_self|
+            assert michael.feed.include?(post_self)
+        end
+      ```
+26. リスト 14.44において、フォローしているユーザーの投稿を含めないようにするにはどうすれば良いでしょうか? また、そのような変更を加えると、リスト  14.42のどのテストが失敗するでしょうか?
+    - ```rb
+        Micropost.where("user_id = ?", id)
+      ```
+    - 失敗するテスト
+        - ```rb
+            # フォローしているユーザーの投稿を確認
+            lana.microposts.each do |post_following|
+                assert michael.feed.include?(post_following)
+            end
+        ```
+27. リスト 14.44において、フォローしていないユーザーの投稿を含めるためにはどうすれば良いでしょうか? また、そのような変更を加えると、リスト 14.42のどのテストが失敗するでしょうか? ヒント: 自分自身とフォローしているユーザー、そしてそれ以外という集合は、いったいどういった集合を表すのか考えてみてください。
+    - ```rb
+        Micropost.all
+      ```
+    - 失敗するテスト
+        - ```rb
+            # フォローしていないユーザーの投稿を確認
+            archer.microposts.each do |post_unfollowed|
+                assert_not michael.feed.include?(post_unfollowed)
+            end
+        ```
