@@ -1885,3 +1885,9 @@
         (8.7ms)  SELECT COUNT(*) FROM `users` INNER JOIN `relationships` ON `users`.`id` = `relationships`.`followed_id` WHERE `relationships`.`follower_id` = 1
         => 49
       ```
+13. ブラウザから /users/2 にアクセスし、フォローボタンが表示されていることを確認してみましょう。同様に、/users/5 では [Unfollow] ボタンが表示されているはずです。さて、/users/1 にアクセスすると、どのような結果が表示されるでしょうか?
+    - /user/1にアクセスするとフォローボタン、あんフォローボタンのどちらも表示されません。
+14. ブラウザからHomeページとプロフィールページを表示してみて、統計情報が正しく表示されているか確認してみましょう。
+    - 表示されています。
+15. Homeページに表示されている統計情報に対してテストを書いてみましょう。同様にして、プロフィールページにもテストを追加してみましょう。ヒント: リスト 13.28で示したテストに追加してみてください。
+    - [関連コミット](https://github.com/yanase-kenta0505/rails_tutorial_sample_app/commit/4bc7f4ce809479602631cc0fde74ee5c8f8b4930)
