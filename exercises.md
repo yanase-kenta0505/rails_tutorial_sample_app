@@ -1209,3 +1209,236 @@
 19. 実際に本番環境でユーザー登録をしてみましょう。ユーザー登録時に入力したメールアドレスにメールは届きましたか?
 20. メールを受信できたら、実際にメールをクリックしてアカウントを有効化してみましょう。また、Heroku上のログを調べてみて、有効化に関するログがどうなっているのか調べてみてください。ヒント: ターミナルからheroku logsコマンドを実行してみましょう。
     - herokuを使わないので飛ばす
+
+# 第12章
+## チェックシート
+1. パスワードの再設定で、ダイジェストを使う以外にもセキュリティの観点から注意点がありました。それは、どのようなものだったでしょうか？ 以下の単語を用いて説明してください
+    - メール
+        - メールが第三者によって傍受されると、アカウントが危険にさらされる可能性がある
+    - 期限
+        - トークンが漏洩するリスクに備え、トークンの期限を設ける必要がある
+2. 今回の章の変更で、Userモデルはどのような構造になったでしょうか？
+    - `reset_digest`と`reset_sent_at`が追加された
+3. パスワードを更新する際に考慮する必要がある4つのケースとは何だったでしょうか？
+    - パスワード再設定の有効期限が切れていないか
+    - 無効なパスワードではないか
+    - 新しいパスワードが空文字列ではないか
+    - 新しいパスワードが正しい時のみ更新する
+4. 「パスワード再設定メール」からアクセスする「パスワード再設定フォーム」では、Getパラメーターから取得したメールアドレスを保持するため何をしているでしょうか？
+    - Getパラメーターから取得したメールアドレスをhiddenフィールドとしてフォームに埋め込んでいる
+## 演習
+1. この時点で、テストスイートが greenになっていることを確認してみましょう。
+    - 確認しました
+2. 表 12.1の名前付きルートでは、_pathではなく_urlを使うように記してあります。なぜでしょうか? 考えてみましょう。ヒント: アカウント有効化で行った演習 (11.1.1.1) と同じ理由です。
+    - メール内では相対パスではなく、フルURLを使用する必要があるから
+
+3. リスト 12.4のform_forメソッドでは、なぜ@password_resetではなく:password_resetを使っているのでしょうか? 考えてみてください。
+    - シンボルを使用する方法は、特定のモデルオブジェクトに紐づかないアクションを実行する場合に適しているから
+
+4. 試しに有効なメールアドレスをフォームから送信してみましょう (図 12.6)。どんなエラーメッセージが表示されたでしょうか?
+    - ![](images/2023-11-01-15-03-39.png)
+5. コンソールに移り、先ほどの演習課題で送信した結果、(エラーと表示されてはいるものの) 該当するuserオブジェクトにはreset_digestとreset_sent_atがあることを確認してみましょう。また、それぞれの値はどのようになっていますか?
+    - ```rb
+        claves@clavesnoMacBook-Air sample_app % rails c
+        Loading development environment (Rails 5.1.6)
+        irb(main):001:0> user = User.find_by(email: "example@railstutorial.org")
+        (1.0ms)  SET NAMES utf8,  @@SESSION.sql_mode = CONCAT(CONCAT(@@sql_mode, ',STRICT_ALL_TABLES'), ',NO_AUTO_VALUE_ON_ZERO'),  @@SESSION.sql_auto_is_null = 0, @@SESSION.wait_timeout = 2147483
+        User Load (1.3ms)  SELECT  `users`.* FROM `users` WHERE `users`.`email` = 'example@railstutorial.org' LIMIT 1
+        => #<User id: 1, name: "Example User", email: "example@railstutorial.org", created_at: "2023-10-31 05:40:33", up...
+        irb(main):002:0> user.reset_digest
+        => "$2a$10$gFaGpK5KC011UvRuIsVp4OQUm3F0o2qvEqye5YYeOWBZs5bN6KWkO"
+        irb(main):003:0> user.reset_sent_at
+        => Wed, 01 Nov 2023 06:03:07 JST +09:00
+      ```
+
+6. ブラウザから、送信メールのプレビューをしてみましょう。「Date」の欄にはどんな情報が表示されているでしょうか?
+    - `Wed, 01 Nov 2023 15:36:14 +0900`
+7. パスワード再設定フォームから有効なメールアドレスを送信してみましょう。また、Railsサーバーのログを見て、生成された送信メールの内容を確認してみてください。
+    - ```sh
+        Sent mail to example@railstutorial.org (13.1ms)
+        sample_app-web-1  | Date: Wed, 01 Nov 2023 06:34:22 +0000
+        sample_app-web-1  | From: noreply@example.com
+        sample_app-web-1  | To: example@railstutorial.org
+        sample_app-web-1  | Message-ID: <6541f16ee42b5_14aec61852@a35c41915f25.mail>
+        sample_app-web-1  | Subject: Password reset
+        sample_app-web-1  | Mime-Version: 1.0
+        sample_app-web-1  | Content-Type: multipart/alternative;
+        sample_app-web-1  |  boundary="--==_mimepart_6541f16ee302d_14aec61759";
+        sample_app-web-1  |  charset=UTF-8
+        sample_app-web-1  | Content-Transfer-Encoding: 7bit
+        sample_app-web-1  |
+        sample_app-web-1  |
+        sample_app-web-1  | ----==_mimepart_6541f16ee302d_14aec61759
+        sample_app-web-1  | Content-Type: text/plain;
+        sample_app-web-1  |  charset=UTF-8
+        sample_app-web-1  | Content-Transfer-Encoding: 7bit
+        sample_app-web-1  |
+        sample_app-web-1  | To reset your password click the link below:
+        sample_app-web-1  |
+        sample_app-web-1  | http://localhost:3000/password_resets/j9EJ3dWAUwywrA8VqgnMvg/edit?email=example%40railstutorial.org
+        sample_app-web-1  |
+        sample_app-web-1  | This link will expire in two hours.
+        sample_app-web-1  |
+        sample_app-web-1  | If you did not request your password to be reset, please ignore this email and
+        sample_app-web-1  | your password will stay as it is.
+        sample_app-web-1  |
+        sample_app-web-1  |
+        sample_app-web-1  | ----==_mimepart_6541f16ee302d_14aec61759
+      ```
+8. コンソールに移り、先ほどの演習課題でパスワード再設定をしたUserオブジェクトを探してください。オブジェクトを見つけたら、そのオブジェクトが持つreset_digestとreset_sent_atの値を確認してみましょう。
+    - ```rb
+        irb(main):004:0> user = User.find_by(email: "example@railstutorial.org")
+        User Load (8.9ms)  SELECT  `users`.* FROM `users` WHERE `users`.`email` = 'example@railstutorial.org' LIMIT 1
+        => #<User id: 1, name: "Example User", email: "example@railstutorial.org", created_at: "2023-10-31 05:40:33", up...
+        irb(main):005:0> user.reset_digest
+        => "$2a$10$8ERayC1e8A4Z3.BXC8llI./MTZZobXWJv06nNCB8/qiisOqjqK/qe"
+        irb(main):006:0> user.reset_sent_at
+        => Wed, 01 Nov 2023 06:34:22 JST +09:00
+      ```
+
+9. メイラーのテストだけを実行してみてください。このテストは greenになっているでしょうか?
+    - ```rb
+        claves@clavesnoMacBook-Air sample_app % rails test:mailers
+        Started with run options --seed 39076
+
+        2/2: [========================================================================] 100% Time: 00:00:00, Time: 00:00:00
+
+        Finished in 0.22190s
+        2 tests, 16 assertions, 0 failures, 0 errors, 0 skips
+      ```
+10. リスト 12.12にある２つ目のCGI.escapeを削除すると、テストが redになることを確認してみましょう。
+    - ```rb
+        claves@clavesnoMacBook-Air sample_app % rails test:mailers
+        Started with run options --seed 33650
+
+        ERROR["test_password_reset", UserMailerTest, 0.23315200000070035]
+        test_password_reset#UserMailerTest (0.23s)
+        ArgumentError:         ArgumentError: wrong number of arguments (given 1, expected 2..3)
+                    test/mailers/user_mailer_test.rb:25:in `block in <class:UserMailerTest>'
+
+        2/2: [========================================================================] 100% Time: 00:00:00, Time: 00:00:00
+
+        Finished in 0.23333s
+        2 tests, 14 assertions, 0 failures, 1 errors, 0 skips
+      ```
+
+11. 12.2.1.1で示した手順に従って、Railsサーバーのログから送信メールを探し出し、そこに記されているリンクを見つけてください。そのリンクをブラウザから表示してみて、図 12.11のように表示されるか確かめてみましょう。
+    - 確認できました
+12. 先ほど表示したページから、実際に新しいパスワードを送信してみましょう。どのような結果になるでしょうか?
+    -  `Unknown action`というエラーが発生する
+    - ```
+        The action 'update' could not be found for PasswordResetsController
+      ```
+
+13. 12.2.1.1で得られたリンク (Railsサーバーのログから取得) をブラウザで表示し、passwordとconfirmationの文字列をわざと間違えて送信してみましょう。どんなエラーメッセージが表示されるでしょうか?
+    - `Password confirmation doesn't match Password`
+14. コンソールに移り、パスワード再設定を送信したユーザーオブジェクトを見つけてください。見つかったら、そのオブジェクトのpassword_digestの値を取得してみましょう。次に、パスワード再設定フォームから有効なパスワードを入力し、送信してみましょう (図 12.13)。パスワードの再設定は成功したら、再度password_digestの値を取得し、先ほど取得した値と異なっていることを確認してみましょう。ヒント: 新しい値はuser.reloadを通して取得する必要があります。
+    - ```rb
+            irb(main):001:0> user = User.find_by(email: "example@railstutorial.org")
+        (1.1ms)  SET NAMES utf8,  @@SESSION.sql_mode = CONCAT(CONCAT(@@sql_mode, ',STRICT_ALL_TABLES'), ',NO_AUTO_VALUE_ON_ZERO'),  @@SESSION.sql_auto_is_null = 0, @@SESSION.wait_timeout = 2147483
+        User Load (1.4ms)  SELECT  `users`.* FROM `users` WHERE `users`.`email` = 'example@railstutorial.org' LIMIT 1
+        => #<User id: 1, name: "Example User", email: "example@railstutorial.org", created_at: "2023-10-31 05:40:33", up...
+        irb(main):002:0> user.password_digest
+        => "$2a$10$cMx85f4TpDCWxdeX4wJ6Q.pqUZAATSwA28BTsUc1f6iFqZ7MsbYYu"
+        irb(main):003:0> user.password_digest
+        => "$2a$10$cMx85f4TpDCWxdeX4wJ6Q.pqUZAATSwA28BTsUc1f6iFqZ7MsbYYu"
+        irb(main):004:0> user.password_digest
+        => "$2a$10$cMx85f4TpDCWxdeX4wJ6Q.pqUZAATSwA28BTsUc1f6iFqZ7MsbYYu"
+        irb(main):005:0> user = User.find_by(email: "example@railstutorial.org")
+        User Load (7.7ms)  SELECT  `users`.* FROM `users` WHERE `users`.`email` = 'example@railstutorial.org' LIMIT 1
+        => #<User id: 1, name: "Example User", email: "example@railstutorial.org", created_at: "2023-10-31 05:40:33", up...
+        irb(main):006:0> user.password_digest
+        => "$2a$10$5qhUvUCI/2Ya7ys.Wf.o9OCJzvJQG1d9MAJdMpV16QawsSaHIe2oe"
+    ```
+
+15. リスト 12.6にあるcreate_reset_digestメソッドはupdate_attributeを２回呼び出していますが、これは各行で１回ずつデータベースへ問い合わせしていることになります。リスト 12.20に記したテンプレートを使って、update_attributeの呼び出しを１回のupdate_columns呼び出しにまとめてみましょう (これでデータベースへの問い合わせが１回で済むようになります)。また、変更後にテストを実行し、 greenになることも確認してください。ちなみにリスト 12.20にあるコードには、前章の演習 (リスト 11.39) の解答も含まれています。
+    - ```rb
+        def create_reset_digest
+            self.reset_token = User.new_token
+            update_columns(reset_digest:  User.digest(reset_token), reset_sent_at: Time.zone.now)
+        end
+      ```
+
+16. リスト 12.21のテンプレートを埋めて、期限切れのパスワード再設定で発生する分岐 (リスト 12.16) を統合テストで網羅してみましょう (12.21 のコードにあるresponse.bodyは、そのページのHTML本文をすべて返すメソッドです)。期限切れをテストする方法はいくつかありますが、リスト 12.21でオススメした手法を使えば、レスポンスの本文に「expired」という語があるかどうかでチェックできます (なお、大文字と小文字は区別されません)。
+    - ```rb
+         test "expired token" do
+            get new_password_reset_path
+            post password_resets_path,
+                params: { password_reset: { email: @user.email } }
+
+            @user = assigns(:user)
+            @user.update_attribute(:reset_sent_at, 3.hours.ago)
+            patch password_reset_path(@user.reset_token),
+                params: { email: @user.email,
+                            user: { password:              "foobar",
+                                    password_confirmation: "foobar" } }
+            assert_response :redirect
+            follow_redirect!
+            assert_match /expired/i, response.body
+        end
+      ```
+
+17. ２時間経ったらパスワードを再設定できなくする方針は、セキュリティ的に好ましいやり方でしょう。しかし、もっと良くする方法はまだあります。例えば、公共の (または共有された) コンピューターでパスワード再設定が行われた場合を考えてみてください。仮にログアウトして離席したとしても、２時間以内であれば、そのコンピューターの履歴からパスワード再設定フォームを表示させ、パスワードを更新してしまうことができてしまいます (しかもそのままログイン機構まで突破されてしまいます!)。この問題を解決するために、リスト 12.22のコードを追加し、パスワードの再設定に成功したらダイジェストをnilになるように変更してみましょう5 。
+    - 変更しました
+
+18. リスト 12.18に１行追加し、１つ前の演習課題に対するテストを書いてみましょう。ヒント: リスト 9.25のassert_nilメソッドとリスト 11.33のuser.reloadメソッドを組み合わせて、reset_digest属性を直接テストしてみましょう。
+    - ```rb
+        test "password resets" do
+            get new_password_reset_path
+            assert_template 'password_resets/new'
+            # メールアドレスが無効
+            post password_resets_path, params: { password_reset: { email: "" } }
+            assert_not flash.empty?
+            assert_template 'password_resets/new'
+            # メールアドレスが有効
+            post password_resets_path,
+                params: { password_reset: { email: @user.email } }
+            assert_not_equal @user.reset_digest, @user.reload.reset_digest
+            assert_equal 1, ActionMailer::Base.deliveries.size
+            assert_not flash.empty?
+            assert_redirected_to root_url
+            # パスワード再設定フォームのテスト
+            user = assigns(:user)
+            # メールアドレスが無効
+            get edit_password_reset_path(user.reset_token, email: "")
+            assert_redirected_to root_url
+            # 無効なユーザー
+            user.toggle!(:activated)
+            get edit_password_reset_path(user.reset_token, email: user.email)
+            assert_redirected_to root_url
+            user.toggle!(:activated)
+            # メールアドレスが有効で、トークンが無効
+            get edit_password_reset_path('wrong token', email: user.email)
+            assert_redirected_to root_url
+            # メールアドレスもトークンも有効
+            get edit_password_reset_path(user.reset_token, email: user.email)
+            assert_template 'password_resets/edit'
+            assert_select "input[name=email][type=hidden][value=?]", user.email
+            # 無効なパスワードとパスワード確認
+            patch password_reset_path(user.reset_token),
+                params: { email: user.email,
+                            user: { password:              "foobaz",
+                                    password_confirmation: "barquux" } }
+            assert_select 'div#error_explanation'
+            # パスワードが空
+            patch password_reset_path(user.reset_token),
+                params: { email: user.email,
+                            user: { password:              "",
+                                    password_confirmation: "" } }
+            assert_select 'div#error_explanation'
+            # 有効なパスワードとパスワード確認
+            patch password_reset_path(user.reset_token),
+                params: { email: user.email,
+                            user: { password:              "foobaz",
+                                    password_confirmation: "foobaz" } }
+            assert is_logged_in?
+            assert_not flash.empty?
+            assert_redirected_to user
+            assert_nil @user.reload.reset_digest
+        end
+      ```
+
+19. production環境でユーザー登録を試してみましょう。ユーザー登録時に入力したメールアドレスにメールは届きましたか?
+20. メールを受信できたら、実際にメールをクリックしてアカウントを有効化してみましょう。また、Heroku上のログを調べてみて、有効化に関するログがどうなっているのか調べてみてください。ヒント: ターミナルからheroku logsコマンドを実行してみましょう。
+21. アカウントを有効化できたら、今度はパスワードの再設定を試してみましょう。正しくパスワードの再設定ができたでしょうか?
+    - herokuを使わないので飛ばす
