@@ -924,7 +924,7 @@
             assert_redirected_to edit_user_url(@user)
             follow_redirect!
             assert_template 'users/edit'
-            
+
             # ログアウトして再度ログイン
             delete logout_path
             log_in_as(@user)
@@ -1071,3 +1071,141 @@
         Finished in 0.80902s
         44 tests, 180 assertions, 1 failures, 0 errors, 0 skips
       ```
+
+#　第11章
+## チェックシート
+1. ユーザーの有効化に使用する有効化トークンは、何故ハッシュ化したトークン(ダイジェスト)を使用するのでしょうか？
+    - セキュリティのため
+    - ユーザーがアカウントを有効化する際に、サーバー側ではユーザーが提供したトークンをハッシュ化し、データベースに保存されているダイジェストと照合する。
+    これにより、万が一トークンが漏洩したとしても、攻撃者が直接データベースにアクセスしない限り、アカウントを不正に有効化することができない。
+2. メールに記載するURLに付与する値は、何故Base64でエンコードするのでしょうか？
+    - URL内で安全にトークンを送信するため。
+    - Base64エンコードは、バイナリデータをASCII文字列に変換するエンコーディング方式であり、
+    URL内で使用できない特殊文字を含まない文字列に変換することができる
+## 演習
+1. 現時点でテストスイートを実行すると greenになることを確認してみましょう。
+    - ```sh
+        claves@clavesnoMacBook-Air sample_app % rails test
+        Started with run options --seed 6492
+
+        44/44: [===============================================================================================] 100% Time: 00:00:00, Time: 00:00:00
+
+        Finished in 0.88069s
+        44 tests, 181 assertions, 0 failures, 0 errors, 0 skips
+      ```
+2. 表 11.2の名前付きルートでは、_pathではなく_urlを使うように記してあります。なぜでしょうか? 考えてみましょう。ヒント: 私達はこれからメールで名前付きルートを使います。
+    - メール内でリンクを使用する際はフルURLを使用する必要があるため
+    - _pathは相対パスになってしまいリンクが正しく機能しない
+
+3. 本項での変更を加えた後、テストスイートが green のままになっていることを確認してみましょう。
+    - 確認しました。
+4. コンソールからUserクラスのインスタンスを生成し、そのオブジェクトからcreate_activation_digestメソッドを呼び出そうとすると (Privateメソッドなので) NoMethodErrorが発生することを確認してみましょう。また、そのUserオブジェクトからダイジェストの値も確認してみましょう。
+    - ```sh
+        irb(main):004:0> user = User.first
+        User Load (10.9ms)  SELECT  `users`.* FROM `users` ORDER BY `users`.`id` ASC LIMIT 1
+        => #<User id: 1, name: "Example User", email: "example@railstutorial.org", created_at: "2023-10-31 05:40:33", updated_at: "2023-10-31 05:...
+        irb(main):005:0> user.create_activation_digest
+        Traceback (most recent call last):
+                1: from (irb):5
+        NoMethodError (private method `create_activation_digest' called for #<User:0x0000000104dfd978>)
+        Did you mean?  restore_activation_digest!
+        irb(main):006:0> user.activation_digest
+        => "$2a$10$at.5l6Ytb/D1zDlmP7MKreZs6cn9bHiyPekea3OX07ft.pMZ1Hb.6"
+      ```
+5. リスト 6.34で、メールアドレスの小文字化にはemail.downcase!という (代入せずに済む) メソッドがあることを知りました。このメソッドを使って、リスト 11.3のdowncase_emailメソッドを改良してみてください。また、うまく変更できれば、テストスイートは成功したままになっていることも確認してみてください。
+    - ```rb
+        def downcase_email
+            email.downcase!
+        end
+      ```
+
+    - テストが成功することを確認しました
+
+6. コンソールを開き、CGIモジュールのescapeメソッド (リスト 11.15) でメールアドレスの文字列をエスケープできることを確認してみましょう。このメソッドで"Don't panic!"をエスケープすると、どんな結果になりますか?
+    - ```sh
+        Loading development environment (Rails 5.1.6)
+        irb(main):001:0> 
+        irb(main):002:0> CGI.escape('foo@example.com')
+        => "foo%40example.com"
+        irb(main):003:0> CGI.escape("Don't panic!")
+        => "Don%27t+panic%21"
+      ```
+
+7. Railsのプレビュー機能を使って、ブラウザから先ほどのメールを表示してみてください。「Date」の欄にはどんな内容が表示されているでしょうか?
+    - ![](images/2023-11-01-09-59-37.png)
+
+8. この時点で、テストスイートが greenになっていることを確認してみましょう。
+9. リスト 11.20で使ったCGI.escapeの部分を削除すると、テストが redに変わることを確認してみましょう。
+    - ```sh
+        claves@clavesnoMacBook-Air sample_app % rails test
+        Started with run options --seed 44845
+
+        46/46: [======================================================================] 100% Time: 00:00:01, Time: 00:00:01
+
+        Finished in 1.05194s
+        46 tests, 195 assertions, 0 failures, 0 errors, 0 skips
+
+        claves@clavesnoMacBook-Air sample_app % rails test
+        Started with run options --seed 29599
+
+        ERROR["test_account_activation", UserMailerTest, 0.8494790000841022]
+        test_account_activation#UserMailerTest (0.85s)
+        ArgumentError:         ArgumentError: wrong number of arguments (given 1, expected 2..3)
+                    test/mailers/user_mailer_test.rb:14:in `block in <class:UserMailerTest>'
+
+        46/46: [======================================================================] 100% Time: 00:00:01, Time: 00:00:01
+
+        Finished in 1.16719s
+        46 tests, 193 assertions, 0 failures, 1 errors, 0 skips
+      ```
+
+10. 新しいユーザーを登録したとき、リダイレクト先が適切なURLに変わったことを確認してみましょう。その後、Railsサーバーのログから送信メールの内容を確認してみてください。有効化トークンの値はどうなっていますか?
+    - リダイレクト先はルートになっています
+    - 有効化トークン
+        - o3LoB6ZidAgiAaVoGqTfyg
+11. コンソールを開き、データベース上にユーザーが作成されたことを確認してみましょう。また、このユーザーはデータベース上にはいますが、有効化のステータスがfalseのままになっていることを確認してください。
+    - ```rb
+        irb(main):001:0> user = User.last
+        (0.8ms)  SET NAMES utf8,  @@SESSION.sql_mode = CONCAT(CONCAT(@@sql_mode, ',STRICT_ALL_TABLES'), ',NO_AUTO_VALUE_ON_ZERO'),  @@SESSION.sql_auto_is_null = 0, @@SESSION.wait_timeout = 2147483
+        User Load (1.2ms)  SELECT  `users`.* FROM `users` ORDER BY `users`.`id` DESC LIMIT 1
+        => #<User id: 101, name: "hoge taro", email: "hoge@gmail.com", created_at: "2023-10-31 16:32:36", updated_at: "2...
+        irb(main):002:0> user.activated
+        => false
+      ```
+12. コンソール内で新しいユーザーを作成してみてください。新しいユーザーの記憶トークンと有効化トークンはどのような値になっているでしょうか? また、各トークンに対応するダイジェストの値はどうなっているでしょうか？
+13. リスト 11.26で抽象化したauthenticated?メソッドを使って、先ほどの各トークン/ダイジェストの組み合わせで認証が成功することを確認してみましょう。
+    - ```rb
+        irb(main):011:0> user.remember_token
+        => "L0dJpet4FFInHoOlxclKYg"
+        irb(main):012:0> user.activation_token
+        => "3d4ta_Wz8iP8loSf-yY28A"
+        irb(main):013:0> user.remember_digest
+        => "$2a$10$jzfFZ5EJCplup7I8fbKEdODDo7s7E09kq6EPZj0IViwbbdaYaNGpK"
+        irb(main):014:0> user.activation_digest
+        => "$2a$10$moEr2xGzlGszjxqK6dnxgOVqndadZXrpTr890LyuTy2grGEPFUIRO"
+        irb(main):015:0> user.authenticated?(:remember, user.remember_token)
+        => true
+        irb(main):016:0> user.authenticated?(:activation, user.activation_token)
+        => true
+      ```
+
+14. コンソールから、11.2.4で生成したメールに含まれているURLを調べてみてください。URL内のどこに有効化トークンが含まれているでしょうか?
+    - http://localhost:3000/account_activations/<有効化トークン>/edit?email=hoge%40gmail.com
+15. 先ほど見つけたURLをブラウザに貼り付けて、そのユーザーの認証に成功し、有効化できることを確認してみましょう。また、有効化ステータスがtrueになっていることをコンソールから確認してみてください。
+    - ```sh
+        irb(main):017:0> user = User.find_by(email:"hoge@gmail.com")
+        User Load (11.9ms)  SELECT  `users`.* FROM `users` WHERE `users`.`email` = 'hoge@gmail.com' LIMIT 1
+        => #<User id: 101, name: "hoge taro", email: "hoge@gmail.com", created_at: "2023-10-31 16:32:36", updated_at: "2...
+        irb(main):018:0> user.activated?
+        => true
+      ```
+
+16. リスト 11.35にあるactivateメソッドはupdate_attributeを２回呼び出していますが、これは各行で１回ずつデータベースへ問い合わせしていることになります。リスト 11.39に記したテンプレートを使って、update_attributeの呼び出しを１回のupdate_columns呼び出しにまとめてみましょう (これでデータベースへの問い合わせが１回で済むようになります)。また、変更後にテストを実行し、 greenになることも確認してください。
+17. 現在は、/usersのユーザーindexページを開くとすべてのユーザーが表示され、/users/:idのようにIDを指定すると個別のユーザーを表示できます。しかし考えてみれば、有効でないユーザーは表示する意味がありません。そこで、リスト 11.40のテンプレートを使って、この動作を変更してみましょう9 。なお、ここで使っているActive Recordのwhereメソッドについては、13.3.3でもう少し詳しく説明します。
+18. ここまでの演習課題で変更したコードをテストするために、/users と /users/:id の両方に対する統合テストを作成してみましょう。
+訳注: update_columnsメソッドは、コールバックとバリデーションを実行せずにスキップしますので、コールバックやバリデーションをかける必要がある場合は注意が必要です。
+    - [関連リンク](https://github.com/yanase-kenta0505/rails_tutorial_sample_app/commit/d7f9d02154c5815859facbfd648b964161dcdd1a)
+
+19. 実際に本番環境でユーザー登録をしてみましょう。ユーザー登録時に入力したメールアドレスにメールは届きましたか?
+20. メールを受信できたら、実際にメールをクリックしてアカウントを有効化してみましょう。また、Heroku上のログを調べてみて、有効化に関するログがどうなっているのか調べてみてください。ヒント: ターミナルからheroku logsコマンドを実行してみましょう。
+    - herokuを使わないので飛ばす
