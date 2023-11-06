@@ -1896,3 +1896,89 @@
     - 確認しました
 17. リスト 14.29のassert_selectに関連するコードをコメントアウトしてみて、テストが正しく red に変わることを確認してみましょう。
     - 確認しました
+
+18. ブラウザ上から /users/2 を開き、[Follow] と [Unfollow] を実行してみましょう。うまく機能しているでしょうか?
+    - 確認しました
+19. 先ほどの演習を終えたら、Railsサーバーのログを見てみましょう。フォロー/フォロー解除が実行されると、それぞれどのテンプレートが描画されているでしょうか?
+    - ```rb
+        Started POST "/relationships" for 192.168.65.1 at 2023-11-06 14:32:13 +0900
+        sample_app-web-1  | Cannot render console from 192.168.65.1! Allowed networks: 127.0.0.1, ::1, 127.0.0.0/127.255.255.255
+        sample_app-web-1  | Processing by RelationshipsController#create as HTML
+        sample_app-web-1  |   Parameters: {"utf8"=>"✓", "authenticity_token"=>"6oHo5sn5sWeuylE8HwbMmKaVL0wqDZMKD9STIQSRCiHTusV+GiTLmiGwfYd4JD9FPgiG4+qz1AF8vGixSZW0ug==", "followed_id"=>"2", "commit"=>"Follow"}
+        sample_app-web-1  |   User Load (8.1ms)  SELECT  `users`.* FROM `users` WHERE `users`.`id` = 1 LIMIT 1
+        sample_app-web-1  |   User Load (1.1ms)  SELECT  `users`.* FROM `users` WHERE `users`.`id` = 2 LIMIT 1
+        sample_app-web-1  |    (0.3ms)  BEGIN
+        sample_app-web-1  |   CACHE User Load (0.0ms)  SELECT  `users`.* FROM `users` WHERE `users`.`id` = 1 LIMIT 1  [["id", 1], ["LIMIT", 1]]
+        sample_app-web-1  |   SQL (1.6ms)  INSERT INTO `relationships` (`follower_id`, `followed_id`, `created_at`, `updated_at`) VALUES (1, 2, '2023-11-06 14:32:13', '2023-11-06 14:32:13')
+        sample_app-web-1  |    (1.6ms)  COMMIT
+        sample_app-web-1  | Redirected to http://localhost:3000/users/2
+        sample_app-web-1  | Completed 302 Found in 32ms (ActiveRecord: 12.8ms)
+        sample_app-web-1  |
+        sample_app-web-1  |
+        sample_app-web-1  | Started GET "/users/2" for 192.168.65.1 at 2023-11-06 14:32:13 +0900
+        sample_app-web-1  | Cannot render console from 192.168.65.1! Allowed networks: 127.0.0.1, ::1, 127.0.0.0/127.255.255.255
+        sample_app-web-1  | Processing by UsersController#show as HTML
+        sample_app-web-1  |   Parameters: {"id"=>"2"}
+        sample_app-web-1  |   User Load (1.2ms)  SELECT  `users`.* FROM `users` WHERE `users`.`id` = 2 LIMIT 1
+        sample_app-web-1  |   Rendering users/show.html.erb within layouts/application
+        sample_app-web-1  |    (1.7ms)  SELECT COUNT(*) FROM `users` INNER JOIN `relationships` ON `users`.`id` = `relationships`.`followed_id` WHERE `relationships`.`follower_id` = 2
+        sample_app-web-1  |    (1.1ms)  SELECT COUNT(*) FROM `users` INNER JOIN `relationships` ON `users`.`id` = `relationships`.`follower_id` WHERE `relationships`.`followed_id` = 2
+        sample_app-web-1  |   Rendered shared/_stats.html.erb (6.7ms)
+        sample_app-web-1  |   User Load (0.6ms)  SELECT  `users`.* FROM `users` WHERE `users`.`id` = 1 LIMIT 1
+        sample_app-web-1  |   User Exists (0.5ms)  SELECT  1 AS one FROM `users` INNER JOIN `relationships` ON `users`.`id` = `relationships`.`followed_id` WHERE `relationships`.`follower_id` = 1 AND `users`.`id` = 2 LIMIT 1
+        sample_app-web-1  |   Relationship Load (0.5ms)  SELECT  `relationships`.* FROM `relationships` WHERE `relationships`.`follower_id` = 1 AND `relationships`.`followed_id` = 2 LIMIT 1
+        sample_app-web-1  |   Rendered users/_unfollow.html.erb (2.4ms)
+        sample_app-web-1  |   Rendered users/_follow_form.html.erb (6.3ms)
+        sample_app-web-1  |   Micropost Exists (0.6ms)  SELECT  1 AS one FROM `microposts` WHERE `microposts`.`user_id` = 2 LIMIT 1
+        sample_app-web-1  |    (0.5ms)  SELECT COUNT(*) FROM `microposts` WHERE `microposts`.`user_id` = 2
+        sample_app-web-1  |   Micropost Load (3.3ms)  SELECT  `microposts`.* FROM `microposts` WHERE `microposts`.`user_id` = 2 ORDER BY `microposts`.`created_at` DESC LIMIT 30 OFFSET 0
+        sample_app-web-1  |   Rendered collection of microposts/_micropost.html.erb [30 times] (8.4ms)
+        sample_app-web-1  |   CACHE  (0.0ms)  SELECT COUNT(*) FROM `microposts` WHERE `microposts`.`user_id` = 2  [["user_id", 2]]
+        sample_app-web-1  |   Rendered users/show.html.erb within layouts/application (49.4ms)
+        sample_app-web-1  |   Rendered layouts/_rails_default.html.erb (29.3ms)
+        sample_app-web-1  |   Rendered layouts/_shim.html.erb (0.2ms)
+        sample_app-web-1  |   Rendered layouts/_header.html.erb (0.6ms)
+        sample_app-web-1  |   Rendered layouts/_footer.html.erb (0.2ms)
+        sample_app-web-1  | Completed 200 OK in 108ms (Views: 91.5ms | ActiveRecord: 10.0ms)
+        sample_app-web-1  |
+        sample_app-web-1  |
+        sample_app-web-1  | Started DELETE "/relationships/89" for 192.168.65.1 at 2023-11-06 14:32:22 +0900
+        sample_app-web-1  | Cannot render console from 192.168.65.1! Allowed networks: 127.0.0.1, ::1, 127.0.0.0/127.255.255.255
+        sample_app-web-1  | Processing by RelationshipsController#destroy as HTML
+        sample_app-web-1  |   Parameters: {"utf8"=>"✓", "authenticity_token"=>"truxvO2B/8YF9/oZ0zpFMBkmIX6cr8AHCP9BR56H9y+PgJwkPlyFO4qN1qK0GLbtgbuI0VwRhwx7l7rX04NJtA==", "commit"=>"Unfollow", "id"=>"89"}
+        sample_app-web-1  |   User Load (1.8ms)  SELECT  `users`.* FROM `users` WHERE `users`.`id` = 1 LIMIT 1
+        sample_app-web-1  |   Relationship Load (1.2ms)  SELECT  `relationships`.* FROM `relationships` WHERE `relationships`.`id` = 89 LIMIT 1
+        sample_app-web-1  |   User Load (2.5ms)  SELECT  `users`.* FROM `users` WHERE `users`.`id` = 2 LIMIT 1
+        sample_app-web-1  |   Relationship Load (4.5ms)  SELECT  `relationships`.* FROM `relationships` WHERE `relationships`.`follower_id` = 1 AND `relationships`.`followed_id` = 2 LIMIT 1
+        sample_app-web-1  |    (1.1ms)  BEGIN
+        sample_app-web-1  |   SQL (1.3ms)  DELETE FROM `relationships` WHERE `relationships`.`id` = 89
+        sample_app-web-1  |    (1.9ms)  COMMIT
+        sample_app-web-1  | Redirected to http://localhost:3000/users/2
+        sample_app-web-1  | Completed 302 Found in 25ms (ActiveRecord: 14.3ms)
+        sample_app-web-1  |
+        sample_app-web-1  |
+        sample_app-web-1  | Started GET "/users/2" for 192.168.65.1 at 2023-11-06 14:32:22 +0900
+        sample_app-web-1  | Cannot render console from 192.168.65.1! Allowed networks: 127.0.0.1, ::1, 127.0.0.0/127.255.255.255
+        sample_app-web-1  | Processing by UsersController#show as HTML
+        sample_app-web-1  |   Parameters: {"id"=>"2"}
+        sample_app-web-1  |   User Load (1.1ms)  SELECT  `users`.* FROM `users` WHERE `users`.`id` = 2 LIMIT 1
+        sample_app-web-1  |   Rendering users/show.html.erb within layouts/application
+        sample_app-web-1  |    (1.8ms)  SELECT COUNT(*) FROM `users` INNER JOIN `relationships` ON `users`.`id` = `relationships`.`followed_id` WHERE `relationships`.`follower_id` = 2
+        sample_app-web-1  |    (1.0ms)  SELECT COUNT(*) FROM `users` INNER JOIN `relationships` ON `users`.`id` = `relationships`.`follower_id` WHERE `relationships`.`followed_id` = 2
+        sample_app-web-1  |   Rendered shared/_stats.html.erb (5.6ms)
+        sample_app-web-1  |   User Load (0.8ms)  SELECT  `users`.* FROM `users` WHERE `users`.`id` = 1 LIMIT 1
+        sample_app-web-1  |   User Exists (0.7ms)  SELECT  1 AS one FROM `users` INNER JOIN `relationships` ON `users`.`id` = `relationships`.`followed_id` WHERE `relationships`.`follower_id` = 1 AND `users`.`id` = 2 LIMIT 1
+        sample_app-web-1  |   Rendered users/_follow.html.erb (0.8ms)
+        sample_app-web-1  |   Rendered users/_follow_form.html.erb (5.4ms)
+        sample_app-web-1  |   Micropost Exists (0.7ms)  SELECT  1 AS one FROM `microposts` WHERE `microposts`.`user_id` = 2 LIMIT 1
+        sample_app-web-1  |    (1.4ms)  SELECT COUNT(*) FROM `microposts` WHERE `microposts`.`user_id` = 2
+        sample_app-web-1  |   Micropost Load (2.0ms)  SELECT  `microposts`.* FROM `microposts` WHERE `microposts`.`user_id` = 2 ORDER BY `microposts`.`created_at` DESC LIMIT 30 OFFSET 0
+        sample_app-web-1  |   Rendered collection of microposts/_micropost.html.erb [30 times] (4.5ms)
+        sample_app-web-1  |   CACHE  (0.0ms)  SELECT COUNT(*) FROM `microposts` WHERE `microposts`.`user_id` = 2  [["user_id", 2]]
+        sample_app-web-1  |   Rendered users/show.html.erb within layouts/application (33.1ms)
+        sample_app-web-1  |   Rendered layouts/_rails_default.html.erb (26.0ms)
+        sample_app-web-1  |   Rendered layouts/_shim.html.erb (0.2ms)
+        sample_app-web-1  |   Rendered layouts/_header.html.erb (0.5ms)
+        sample_app-web-1  |   Rendered layouts/_footer.html.erb (0.2ms)
+        sample_app-web-1  | Completed 200 OK in 83ms (Views: 69.6ms | ActiveRecord: 9.4ms)
+      ```
