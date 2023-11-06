@@ -1442,3 +1442,321 @@
 20. メールを受信できたら、実際にメールをクリックしてアカウントを有効化してみましょう。また、Heroku上のログを調べてみて、有効化に関するログがどうなっているのか調べてみてください。ヒント: ターミナルからheroku logsコマンドを実行してみましょう。
 21. アカウントを有効化できたら、今度はパスワードの再設定を試してみましょう。正しくパスワードの再設定ができたでしょうか?
     - herokuを使わないので飛ばす
+
+
+# 第13章
+## チェックシート
+1. この章で登場するdefault_scopeはどのようなものでしょうか？
+    - ある特定の順序でレコードを取得したい場合などに使用される
+2. マイクロポストモデルに指定した属性「dependent: :destroy」が表現しているものは何でしょうか？
+    - 親が削除されたら子も削除する
+    - Userが削除されたらMicropostも削除する
+3. なぜ画像の投稿機能にバリデーションを設けたのでしょうか？
+    - 不正なファイル形式のアップロードを防ぐ。
+    - アップロードされる画像のサイズが大きすぎることによるサーバーへの負荷を防ぐ。
+## 演習
+1. RailsコンソールでMicropost.newを実行し、インスタンスを変数micropostに代入してください。その後、user_idに最初のユーザーのidを、contentに "Lorem ipsum" をそれぞれ代入してみてください。この時点では、 micropostオブジェクトのマジックカラム (created_atとupdated_at) には何が入っているでしょうか?
+    - nil
+2. 先ほど作ったオブジェクトを使って、micropost.userを実行してみましょう。どのような結果が返ってくるでしょうか? また、micropost.user.nameを実行した場合の結果はどうなるでしょうか?
+    - ```rb
+        irb(main):013:0> puts micropost.user
+        User Load (6.5ms)  SELECT  `users`.* FROM `users` WHERE `users`.`id` = 1 LIMIT 1
+        #<User:0x000000013beae980>
+        => nil
+      ```
+    - ```rb
+        irb(main):014:0> puts micropost.user.name
+        Example User
+        => nil
+      ```
+3. 先ほど作ったmicropostオブジェクトをデータベースに保存してみましょう。この時点でもう一度マジックカラムの内容を調べてみましょう。今度はどのような値が入っているでしょうか?
+    - ```rb
+        irb(main):015:0> micropost.save
+        (1.8ms)  BEGIN
+        SQL (7.5ms)  INSERT INTO `microposts` (`content`, `user_id`, `created_at`, `updated_at`) VALUES ('Lorem ipsum', 1, '2023-11-02 02:28:21', '2023-11-02 02:28:21')
+        (5.5ms)  COMMIT
+        => true
+        irb(main):016:0> puts micropost.created_at
+        2023-11-02 02:28:21 +0900
+        => nil
+        irb(main):017:0> puts micropost.updated_at
+        2023-11-02 02:28:21 +0900
+        => nil
+      ```
+
+4. Railsコンソールを開き、user_idとcontentが空になっているmicropostオブジェクトを作ってみてください。このオブジェクトに対してvalid?を実行すると、失敗することを確認してみましょう。また、生成されたエラーメッセージにはどんな内容が書かれているでしょうか?
+    - ```rb
+        rb(main):001:0> micropost = Micropost.new
+        (1.0ms)  SET NAMES utf8,  @@SESSION.sql_mode = CONCAT(CONCAT(@@sql_mode, ',STRICT_ALL_TABLES'), ',NO_AUTO_VALUE_ON_ZERO'),  @@SESSION.sql_auto_is_null = 0, @@SESSION.wait_timeout = 2147483
+        => #<Micropost id: nil, content: nil, user_id: nil, created_at: nil, updated_at: nil>
+        irb(main):002:0> micropost.valid?
+        => false
+        irb(main):003:0> micropost.errors.full_messages
+        => ["User must exist", "User can't be blank", "Content can't be blank"]
+      ```
+5. コンソールを開き、今度はuser_idが空でcontentが141文字以上のmicropostオブジェクトを作ってみてください。このオブジェクトに対してvalid?を実行すると、失敗することを確認してみましょう。また、生成されたエラーメッセージにはどんな内容が書かれているでしょうか?
+    - ```rb
+        irb(main):004:0> micropost = Micropost.new(content: "a" * 142)
+        => #<Micropost id: nil, content: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...", user_id: nil, created_...
+        irb(main):005:0> micropost.valid?
+        => false
+        irb(main):006:0> micropost.errors.full_messages
+        => ["User must exist", "User can't be blank", "Content is too long (maximum is 140 characters)"]
+      ```
+
+6. データベースにいる最初のユーザーを変数userに代入してください。そのuserオブジェクトを使ってmicropost = user.microposts.create(content: "Lorem ipsum")を実行すると、どのような結果が得られるでしょうか?
+7. 先ほどの演習課題で、データベース上に新しいマイクロポストが追加されたはずです。user.microposts.find(micropost.id)を実行して、本当に追加されたのかを確かめてみましょう。また、先ほど実行したmicropost.idの部分をmicropostに変更すると、結果はどうなるでしょうか?
+8. user == micropost.userを実行した結果はどうなるでしょうか? また、user.microposts.first == micropost を実行した結果はどうなるでしょうか? それぞれ確認してみてください。
+    - ```rb
+        irb(main):010:0> user = User.first
+        User Load (3.5ms)  SELECT  `users`.* FROM `users` ORDER BY `users`.`id` ASC LIMIT 1
+        => #<User id: 1, name: "Example User", email: "example@railstutorial.org", created_at: "2023-10-31 05:40:33", up...
+        irb(main):011:0> micro ipsum")
+        irb(main):011:0> micropost = user.microposts.create(content: "Lorem ipsum")
+        (0.7ms)  BEGIN
+        SQL (1.1ms)  INSERT INTO `microposts` (`content`, `user_id`, `created_at`, `updated_at`) VALUES ('Lorem ipsum', 1, '2023-11-02 03:01:52', '2023-11-02 03:01:52')
+        (1.2ms)  COMMIT
+        => #<Micropost id: 3, content: "Lorem ipsum", user_id: 1, created_at: "2023-11-01 18:01:52", updated_at: "2023-1...
+        irb(main):012:0> found_micropod)
+        puts found_micropost == micropost  # => true
+        irb(main):012:0> found_micropost = user.microposts.find(micropost.id)
+        Micropost Load (3.6ms)  SELECT  `microposts`.* FROM `microposts` WHERE `microposts`.`user_id` = 1 AND `microposts`.`id` = 3 LIMIT 1
+        => #<Micropost id: 3, content: "Lorem ipsum", user_id: 1, created_at: "2023-11-01 18:01:52", updated_at: "2023-1...
+        irb(main):013:0> puts found_micropost == micropost  # => true
+        true
+        => nil
+        irb(main):014:0> founputs found_micropost == micropost  # => true
+        irb(main):014:0> found_micropost = user.microposts.find(micropost)
+        Traceback (most recent call last):
+                1: from (irb):14
+        ArgumentError (You are passing an instance of ActiveRecord::Base to `find`. Please pass the id of the object by calling `.id`.)
+        puts found_micropost == micropost  # => true
+        irb(main):015:0> puts found_micropost == micropost  # => true
+        true
+        => nil
+        irb(main):016:0> puts user == micropost.user  # => true
+        true
+        => nil
+        irb(main):017:0> puts user.microposts.first == micropost
+        Micropost Load (14.5ms)  SELECT  `microposts`.* FROM `microposts` WHERE `microposts`.`user_id` = 1 ORDER BY `microposts`.`id` ASC LIMIT 1
+        false
+        => nil
+      ```
+
+9. Micropost.first.created_atの実行結果と、Micropost.last.created_atの実行結果を比べてみましょう。
+10. Micropost.firstを実行したときに発行されるSQL文はどうなっているでしょうか? 同様にして、Micropost.lastの場合はどうなっているでしょうか? ヒント: それぞれをコンソール上で実行したときに表示される文字列が、SQL文になります。
+11. データベース上の最初のユーザーを変数userに代入してください。そのuserオブジェクトが最初に投稿したマイクロポストのidはいくつでしょうか? 次に、destroyメソッドを使ってそのuserオブジェクトを削除してみてください。削除すると、そのuserに紐付いていたマイクロポストも削除されていることをMicropost.findで確認してみましょう。
+    - ```rb
+        irb(main):001:0> puts Micropost.first.created_at
+        (1.0ms)  SET NAMES utf8,  @@SESSION.sql_mode = CONCAT(CONCAT(@@sql_mode, ',STRICT_ALL_TABLES'), ',NO_AUTO_VALUE_ON_ZERO'),  @@SESSION.sql_auto_is_null = 0, @@SESSION.wait_timeout = 2147483
+        Micropost Load (1.4ms)  SELECT  `microposts`.* FROM `microposts` ORDER BY `microposts`.`created_at` DESC LIMIT 1
+        2023-11-02 03:01:52 +0900
+        => nil
+        Micropost Load (3.5ms)  SELECT  `microposts`.* FROM `microposts` ORDER BY `microposts`.`created_at` ASC LIMIT 1
+        2023-11-02 02:28:21 +0900
+        => nil
+        irb(main):003:0> Micropost.first
+        Micropost Load (6.4ms)  SELECT  `microposts`.* FROM `microposts` ORDER BY `microposts`.`created_at` DESC LIMIT 1
+        => #<Micropost id: 3, content: "Lorem ipsum", user_id: 1, created_at: "2023-11-01 18:01:52", updated_at: "2023-11-01 18:01:52">
+        irb(main):004:0> Micropost.last
+        Micropost Load (5.6ms)  SELECT  `microposts`.* FROM `microposts` ORDER BY `microposts`.`created_at` ASC LIMIT 1
+        => #<Micropost id: 1, content: "Lorem ipsum", user_id: 1, created_at: "2023-11-01 17:28:21", updated_at: "2023-11-01 17:28:21">
+        irb(main):005:0> user = User.first
+        User Load (3.8ms)  SELECT  `users`.* FROM `users` ORDER BY `users`.`id` ASC LIMIT 1
+        => #<User id: 1, name: "Example User", email: "example@railstutorial.org", created_at: "2023-10-31 05:40:33", up...
+        irb(main):006:0> puts user.micropost.first.id
+        Traceback (most recent call last):
+                1: from (irb):6
+        NoMethodError (undefined method `micropost' for #<User:0x0000000104671fd8>)
+        Did you mean?  microposts
+                    microposts=
+        irb(main):007:0> puts user.microposts.first.id
+        Micropost Load (6.5ms)  SELECT  `microposts`.* FROM `microposts` WHERE `microposts`.`user_id` = 1 ORDER BY `microposts`.`created_at` DESC LIMIT 1
+        3
+        => nil
+        irb(main):008:0> user.destroy
+        (7.4ms)  BEGIN
+        Micropost Load (5.8ms)  SELECT `microposts`.* FROM `microposts` WHERE `microposts`.`user_id` = 1 ORDER BY `microposts`.`created_at` DESC
+        SQL (2.6ms)  DELETE FROM `microposts` WHERE `microposts`.`id` = 3
+        SQL (4.1ms)  DELETE FROM `microposts` WHERE `microposts`.`id` = 2
+        SQL (3.0ms)  DELETE FROM `microposts` WHERE `microposts`.`id` = 1
+        SQL (2.7ms)  DELETE FROM `users` WHERE `users`.`id` = 1
+        (2.0ms)  COMMIT
+        => #<User id: 1, name: "Example User", email: "example@railstutorial.org", created_at: "2023-10-31 05:40:33", updated_at: "2023-10-31 22:41:21", password_digest: "$2a$10$5qhUvUCI/2Ya7ys.Wf.o9OCJzvJQG1d9MAJdMpV16Qa...", remember_digest: nil, admin: true, activation_digest: "$2a$10$at.5l6Ytb/D1zDlmP7MKreZs6cn9bHiyPekea3OX07f...", activated: true, activated_at: "2023-10-31 05:40:33", reset_digest: "$2a$10$8ERayC1e8A4Z3.BXC8llI./MTZZobXWJv06nNCB8/qi...", reset_sent_at: "2023-10-31 21:34:22">
+        irb(main):009:0> Micropost.find(user.microposts.first.id)
+        Traceback (most recent call last):
+                1: from (irb):9
+        NoMethodError (undefined method `id' for nil:NilClass)
+      ```
+
+12. 7.3.3で軽く説明したように、今回ヘルパーメソッドとして使ったtime_ago_in_wordsメソッドは、Railsコンソールのhelperオブジェクトから呼び出すことができます。このhelperオブジェクトのtime_ago_in_wordsメソッドを使って、3.weeks.agoや6.months.agoを実行してみましょう。
+13. helper.time_ago_in_words(1.year.ago)と実行すると、どういった結果が返ってくるでしょうか?
+14. micropostsオブジェクトのクラスは何でしょうか? ヒント: リスト 13.23内のコードにあるように、まずはpaginateメソッド (引数はpage: nil) でオブジェクトを取得し、その後classメソッドを呼び出してみましょう。
+    - ```rb
+        irb(main):001:0> helper.time_ago_in_words(3.weeks.ago)
+        => "21 days"
+        irb(main):002:0> helper.time_ago_in_words(6.months.ago)
+        => "6 months"
+        irb(main):003:0> helper.time_ago_in_words(1.year.ago)
+        => "about 1 year"
+        irb(main):004:0> user = User.first
+        (1.5ms)  SET NAMES utf8,  @@SESSION.sql_mode = CONCAT(CONCAT(@@sql_mode, ',STRICT_ALL_TABLES'), ',NO_AUTO_VALUE_ON_ZERO'),  @@SESSION.sql_auto_is_null = 0, @@SESSION.wait_timeout = 2147483
+        User Load (1.5ms)  SELECT  `users`.* FROM `users` ORDER BY `users`.`id` ASC LIMIT 1
+        => #<User id: 1, name: "Example User", email: "example@railstutorial.org", created_at: "2023-11-01 18:35:44", up...
+        irb(main):005:0> microposts = user.microposts.paginate(page: nil)
+        Micropost Load (9.8ms)  SELECT  `microposts`.* FROM `microposts` WHERE `microposts`.`user_id` = 1 ORDER BY `microposts`.`created_at` DESC LIMIT 11 OFFSET 0
+        => #<ActiveRecord::AssociationRelation []>
+        irb(main):006:0> microposts.class
+        => Micropost::ActiveRecord_AssociationRelation
+      ```
+15. (1..10).to_a.take(6)というコードの実行結果を推測できますか? 推測した値が合っているかどうか、実際にコンソールを使って確認してみましょう。
+16. 先ほどの演習にあったto_aメソッドの部分は本当に必要でしょうか? 確かめてみてください。
+17. Fakerはlorem ipsum以外にも、非常に多種多様の事例に対応しています。Fakerのドキュメント (英語) を眺めながら画面に出力する方法を学び、実際に大学名や電話番号、Hipster IpsumやChuck Norris facts (参考: チャック・ノリスの真実) を画面に出力してみましょう。
+    - ``` rb``
+        claves@clavesnoMacBook-Air sample_app % rails c
+        Loading development environment (Rails 5.1.6)
+        irb(main):001:0> (1..10).to_a.take(6)
+        => [1, 2, 3, 4, 5, 6]
+        irb(main):002:0> (1..10).take(6)
+        => [1, 2, 3, 4, 5, 6]
+        irb(main):003:0> require 'faker'
+        => false
+        irb(main):004:0> Faker::University.name
+        => "Northern Yundt Institute"
+        irb(main):005:0> Faker::PhoneNumber.phone_number
+        => "1-568-351-1174 x836"
+        irb(main):006:0> Faker::Hipster.sentence  
+        => "Chia narwhal helvetica bespoke raw denim fingerstache stumptown kogi."
+        irb(main):007:0> Faker::ChuckNorris.fact
+        => "Chuck Norris doesn't program with a keyboard. He stares the computer down until it does what he wants."
+        irb(main):008:0> 
+      ```
+
+18. リスト 13.28にある２つの'h1'のテストが正しいか確かめるため、該当するアプリケーション側のコードをコメントアウトしてみましょう。テストが green から redに変わることを確認してみてください。
+    - 確認しました
+19. リスト 13.28にあるテストを変更して、will_paginateが１度のみ表示されていることをテストしてみましょう。ヒント: 表 5.2を参考にしてください。
+    - ```rb
+        test "profile display" do
+            get user_path(@user)
+            assert_template 'users/show'
+            assert_select 'title', full_title(@user.name)
+            assert_select 'h1', text: @user.name
+            assert_select 'h1>img.gravatar'
+            assert_match @user.microposts.count.to_s, response.body
+            assert_select 'div.pagination', count: 1
+            @user.microposts.paginate(page: 1).each do |micropost|
+                assert_match micropost.content, response.body
+            end
+        end
+      ```
+
+20. なぜUsersコントローラ内にあるlogged_in_userフィルターを残したままにするとマズイのでしょうか? 考えてみてください。
+    - ApplicationController と UsersController の両方に logged_in_user メソッドが定義されていると、どちらのメソッドが呼ばれるかが曖昧になるため
+
+21. Homeページをリファクタリングして、if-else文の分岐のそれぞれに対してパーシャルを作ってみましょう。
+    - [リンク](https://github.com/yanase-kenta0505/rails_tutorial_sample_app/commit/71ffcc553041b0e0f2aa2233a72c0ca0fffbeada)
+
+22. 新しく実装したマイクロポストの投稿フォームを使って、実際にマイクロポストを投稿してみましょう。Railsサーバーのログ内にあるINSERT文では、どういった内容をデータベースに送っているでしょうか? 確認してみてください。
+    - ```
+         INSERT INTO `microposts` (`content`, `user_id`, `created_at`, `updated_at`) VALUES ('tests', 1, '2023-11-02 02:47:15', '2023-11-02 02:47:15')
+      ```
+23. コンソールを開き、user変数にデータベース上の最初のユーザーを代入してみましょう。その後、Micropost.where("user_id = ?", user.id)とuser.microposts、そしてuser.feedをそれぞれ実行してみて、実行結果がすべて同じであることを確認してみてください。ヒント: ==で比較すると結果が同じかどうか簡単に判別できます。
+    - ```rb
+        irb(main):001:0> user = User.first
+        (1.0ms)  SET NAMES utf8,  @@SESSION.sql_mode = CONCAT(CONCAT(@@sql_mode, ',STRICT_ALL_TABLES'), ',NO_AUTO_VALUE_ON_ZERO'),  @@SESSION.sql_auto_is_null = 0, @@SESSION.wait_timeout = 2147483
+        User Load (1.0ms)  SELECT  `users`.* FROM `users` ORDER BY `users`.`id` ASC LIMIT 1
+        => #<User id: 1, name: "Example User", email: "example@railstutorial.org", created_at: "2023-11-02 00:45:36", up...
+        irb(main):002:0> microposts_by_where = Micropost.where("user_id = ?", user.id)
+        Micropost Load (4.3ms)  SELECT  `microposts`.* FROM `microposts` WHERE (user_id = 1) ORDER BY `microposts`.`created_at` DESC LIMIT 11
+        => #<ActiveRecord::Relation [#<Micropost id: 295, content: "Ipsum earum distinctio sit enim omnis.", user_id: 1,...
+        irb(main):003:0> microposts_by_association = user.microposts
+        Micropost Load (4.6ms)  SELECT  `microposts`.* FROM `microposts` WHERE `microposts`.`user_id` = 1 ORDER BY `microposts`.`created_at` DESC LIMIT 11
+        => #<ActiveRecord::Associations::CollectionProxy [#<Micropost id: 295, content: "Ipsum earum distinctio sit enim...
+        irb(main):004:0> microposts_by_feed = user.feed
+        Micropost Load (4.9ms)  SELECT  `microposts`.* FROM `microposts` WHERE (user_id = 1) ORDER BY `microposts`.`created_at` DESC LIMIT 11
+        => #<ActiveRecord::Relation [#<Micropost id: 295, content: "Ipsum earum distinctio sit enim omnis.", user_id: 1,...
+        irb(main):005:0> microposts_by_where == microposts_by_association
+        Micropost Load (8.8ms)  SELECT `microposts`.* FROM `microposts` WHERE `microposts`.`user_id` = 1 ORDER BY `microposts`.`created_at` DESC
+        Micropost Load (7.0ms)  SELECT `microposts`.* FROM `microposts` WHERE (user_id = 1) ORDER BY `microposts`.`created_at` DESC
+        => true
+        irb(main):006:0> microposts_by_association == microposts_by_feed
+        Micropost Load (5.5ms)  SELECT `microposts`.* FROM `microposts` WHERE (user_id = 1) ORDER BY `microposts`.`created_at` DESC
+        => true
+      ```
+
+24. マイクロポストを作成し、その後、作成したマイクロポストを削除してみましょう。次に、Railsサーバーのログを見てみて、DELETE文の内容を確認してみてください。
+    - `DELETE FROM `microposts` WHERE `microposts`.`id` = 302`
+25. redirect_to request.referrer || root_urlの行をredirect_back(fallback_location: root_url)と置き換えてもうまく動くことを、ブラウザを使って確認してみましょう (このメソッドはRails 5から新たに導入されました)。
+    - 確認しました
+26. リスト 13.55で示した４つのコメント (「無効な送信」など) のそれぞれに対して、テストが正しく動いているか確認してみましょう。具体的には、対応するアプリケーション側のコードをコメントアウトし、テストが redになることを確認し、元に戻すと greenになることを確認してみましょう。
+    - 確認しました
+27. サイドバーにあるマイクロポストの合計投稿数をテストしてみましょう。このとき、単数形 (micropost) と複数形 (microposts) が正しく表示されているかどうかもテストしてください。ヒント: リスト 13.57を参考にしてみてください。
+    - ````rb
+        test "micropost sidebar count" do
+            log_in_as(@user)
+            get root_path
+            assert_match "#{@user.microposts.count} microposts", response.body
+            # ユーザーがまだマイクロポストを投稿していない場合
+            other_user = users(:malory)
+            log_in_as(other_user)
+            get root_path
+            assert_match "0 microposts", response.body
+            other_user.microposts.create!(content: "A micropost")
+            get root_path
+            assert_match "1 micropost", response.body
+        end
+      ```
+
+28. 画像付きのマイクロポストを投稿してみましょう。もしかして、大きすぎる画像が表示されてしまいましたか? (心配しないでください、次の13.4.3でこの問題を直します)。
+    - 確認しました
+29. リスト 13.63に示すテンプレートを参考に、13.4で実装した画像アップローダーをテストしてください。テストの準備として、まずはサンプル画像をfixtureディレクトリに追加してください (コマンド例: cp app/assets/images/rails.png test/fixtures/)。リスト 13.63で追加したテストでは、Homeページにあるファイルアップロードと、投稿に成功した時に画像が表示されているかどうかをチェックしています。なお、テスト内にあるfixture_file_uploadというメソッドは、fixtureで定義されたファイルをアップロードする特別なメソッドです18 。ヒント: picture属性が有効かどうかを確かめるときは、11.3.3で紹介したassignsメソッドを使ってください。このメソッドを使うと、投稿に成功した後にcreateアクション内のマイクロポストにアクセスするようになります。
+    - ```rb
+        test "micropost interface with image upload" do
+            log_in_as(@user)
+            get root_path
+            assert_select 'input[type="file"]'
+
+            # 無効な送信
+            assert_no_difference 'Micropost.count' do
+                post microposts_path, params: { micropost: { content: "" } }
+            end
+            assert_select 'div#error_explanation'
+
+            # 有効な送信
+            content = "This micropost really ties the room together"
+            picture = fixture_file_upload('test/fixtures/rails.png', 'image/png')
+            assert_difference 'Micropost.count', 1 do
+                post microposts_path, params: { micropost: { content: content, picture: picture } }
+            end
+            assert_redirected_to root_url
+            follow_redirect!
+            assert_match content, response.body
+            micropost = assigns(:micropost)
+            assert micropost.picture?
+
+            # 投稿を削除する
+            assert_select 'a', text: 'delete'
+            first_micropost = @user.microposts.paginate(page: 1).first
+            assert_difference 'Micropost.count', -1 do
+                delete micropost_path(first_micropost)
+            end
+
+            # 別のユーザーのプロフィールにアクセス (削除リンクがないことを確認)
+            get user_path(users(:archer))
+            assert_select 'a', text: 'delete', count: 0
+        end
+
+      ```
+
+30. 5MB以上の画像ファイルを送信しようとした場合、どうなりますか?
+    - `Maximum file size is 5MB. Please choose a smaller file.`というアラートが出る
+31. 無効な拡張子のファイルを送信しようとした場合、どうなりますか?
+    - まず無効なファイルを選択できない
+
+32. 解像度の高い画像をアップロードし、リサイズされているかどうか確認してみましょう。画像が長方形だった場合、リサイズはうまく行われているでしょうか?
+    - うまくいっています
+33. 既にリスト 13.63のテストを追加していた場合、この時点でテストスイートを走らせると紛らわしいエラーメッセージが表示されることがあります。このエラーを取り除いてみましょう。ヒント: リスト 13.68にある設定ファイルを修正し、テスト時はCarrierWaveに画像のリサイズをさせないようにしてみましょう。
+    - 対応しました。
+
+34. 本番環境で解像度の高い画像をアップロードし、適切にリサイズされているか確認してみましょう。長方形の画像であっても、適切にリサイズされていますか?
+    - ここは飛ばします
