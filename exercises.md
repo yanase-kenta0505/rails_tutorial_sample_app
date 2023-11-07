@@ -1760,3 +1760,399 @@
 
 34. 本番環境で解像度の高い画像をアップロードし、適切にリサイズされているか確認してみましょう。長方形の画像であっても、適切にリサイズされていますか?
     - ここは飛ばします
+
+# 第14章
+## チェックシート
+1. フォロー機能を実装するための中間テーブルを表現するデータモデルである、Relationshipモデルの構造はどのようなものでしょうか？
+    - id, follower_id, followed_id, created_at, updated_at
+2. Relationshipモデルのfollower_idとfollowed_idの組み合わせが必ずユニークになるようにするのはなぜでしょうか？
+    - 重複したフォロー関係が作成されるのを防ぐため
+3. Relationshipモデルに指定した属性「has_many: through」とは何でしょうか？以下の単語を用いてを説明して下さい。
+・多対多
+・第3のモデル
+    - 第3のモデルを介して、2つのモデル間の多対多の関係を表現できる。
+4. Ajaxを使うことでできることは何でしょうか？以下の単語を用いて説明してください。
+・非同期
+・リクエスト
+    - ページ全体をリロードせずに、非同期でサーバーにリクエストを送信し、データを取得または送信することができる。
+5. DBから効率良くユーザーのフォロワーを取得するため、クエリにどのような変更を加えたでしょうか？
+    サブセレクトを使うようにした。
+## 演習
+1. 図 14.7のid=1のユーザーに対してuser.following.map(&:id)を実行すると、結果はどのようになるでしょうか? 想像してみてください。ヒント: 4.3.2で紹介したmap(&:method_name)のパターンを思い出してください。例えばuser.following.map(&:id)の場合、idの配列を返します。
+    - ```rb
+        irb(main):008:0> user = User.find(1)
+        User Load (3.6ms)  SELECT  `users`.* FROM `users` WHERE `users`.`id` = 1 LIMIT 1
+        => #<User id: 1, name: "Example User", email: "example@railstutorial.org", created_at: "2023-11-02 09:15:07",...
+        irb(main):009:0> following_ids = user.following.map(&:id)
+        Traceback (most recent call last):
+                1: from (irb):9
+        NoMethodError (undefined method `following' for #<User:0x0000000142336a60>)
+      ```
+2. 図 14.7を参考にして、id=2のユーザーに対してuser.followingを実行すると、結果はどのようになるでしょうか? また、同じユーザーに対してuser.following.map(&:id)を実行すると、結果はどのようになるでしょうか? 想像してみてください。
+    - ```rb
+        irb(main):010:0> user = User.find(2)
+        User Load (3.6ms)  SELECT  `users`.* FROM `users` WHERE `users`.`id` = 2 LIMIT 1
+        => #<User id: 2, name: "Mr. Helmer Nitzsche", email: "example-1@railstutorial.org", created_at: "2023-11-02 0...
+        irb(main):011:0> following_users = user.following
+        Traceback (most recent call last):
+                1: from (irb):11
+        NoMethodError (undefined method `following' for #<User:0x00000001143083a0>)
+        irb(main):012:0> following_ids = user.following.map(&:id)
+        Traceback (most recent call last):
+                2: from (irb):11
+                1: from (irb):12:in `rescue in irb_binding'
+        NoMethodError (undefined method `following' for #<User:0x00000001143083a0>)
+      ```
+3. コンソールを開き、表 14.1のcreateメソッドを使ってActiveRelationshipを作ってみましょう。データベース上に２人以上のユーザーを用意し、最初のユーザーが２人目のユーザーをフォローしている状態を作ってみてください。
+4. 先ほどの演習を終えたら、active_relationship.followedの値とactive_re
+    lationship.followerの値を確認し、それぞれの値が正しいことを確認してみましょう。
+    - ```rb
+        irb(main):001:0> user1 = User.find(1)
+        (11.1ms)  SET NAMES utf8,  @@SESSION.sql_mode = CONCAT(CONCAT(@@sql_mode, ',STRICT_ALL_TABLES'), ',NO_AUTO_VALUE_ON_ZERO'),  @@SESSION.time_zone = 'Asia/Tokyo', @@SESSION.sql_auto_is_null = 0, @@SESSION.wait_timeout = 2147483
+        User Load (4.7ms)  SELECT  `users`.* FROM `users` WHERE `users`.`id` = 1 LIMIT 1
+        => #<User id: 1, name: "Example User", email: "example@railstutorial.org", created_at: "2023-11-02 09:15:07"...
+        irb(main):002:0> user2 = User.find(2)
+        User Load (6.2ms)  SELECT  `users`.* FROM `users` WHERE `users`.`id` = 2 LIMIT 1
+        => #<User id: 2, name: "Mr. Helmer Nitzsche", email: "example-1@railstutorial.org", created_at: "2023-11-02 ...
+        irb(main):003:0> active_relationship = user1.active_relationships.create(followed_id: user2.id)
+        (3.5ms)  BEGIN
+        User Load (5.3ms)  SELECT  `users`.* FROM `users` WHERE `users`.`id` = 1 LIMIT 1
+        User Load (3.0ms)  SELECT  `users`.* FROM `users` WHERE `users`.`id` = 2 LIMIT 1
+        SQL (15.9ms)  INSERT INTO `relationships` (`follower_id`, `followed_id`, `created_at`, `updated_at`) VALUES (1, 2, '2023-11-05 13:20:24', '2023-11-05 13:20:24')
+        (3.5ms)  COMMIT
+        => #<Relationship id: 1, follower_id: 1, followed_id: 2, created_at: "2023-11-05 04:20:24", updated_at: "202...
+        irb(main):004:0> active_relationship.followed
+        => #<User id: 2, name: "Mr. Helmer Nitzsche", email: "example-1@railstutorial.org", created_at: "2023-11-02 09:15:07", updated_at: "2023-11-02 09:15:07", password_digest: "$2a$10$SmwINAJ6QArEIq5nuCWB5OXTr6Xi14nBSkwgM40ajQa...", remember_digest: nil, admin: false, activation_digest: "$2a$10$9VjipLxZzvhj/VjbZ70kSuuGRGMH1QWzwO45SrhozHA...", activated: true, activated_at: "2023-11-02 09:15:07", reset_digest: nil, reset_sent_at: nil>
+        irb(main):005:0> active_relationship.follower
+        => #<User id: 1, name: "Example User", email: "example@railstutorial.org", created_at: "2023-11-02 09:15:07", updated_at: "2023-11-02 09:15:07", password_digest: "$2a$10$Q5/BuVqh/Ser3tzVOKY5E.ci0/fiRhqhgvir4XlypI0...", remember_digest: nil, admin: true, activation_digest: "$2a$10$V09iM2ZXNNso3ORm6MMBke7.x8mrITfP0nAj6jI4oOy...", activated: true, activated_at: "2023-11-02 09:15:07", reset_digest: "$2a$10$AJ6/9WmU6nH66d//FeGW.OBKWhx8USaM6Jh7XlvDv9U...", reset_sent_at: "2023-11-04 13:05:16">
+      ```
+
+5. リスト 14.5のバリデーションをコメントアウトしても、テストが成功したままになっていることを確認してみましょう。(以前のRailsのバージョンでは、このバリデーションが必須でしたが、Rails 5から必須ではなくなりました。今回はフォロー機能の実装を優先しますが、この手のバリデーションが省略されている可能性があることを頭の片隅で覚えておくと良いでしょう。)
+    - 確認しました
+
+6. コンソールを開き、リスト 14.9のコードを順々に実行してみましょう。
+7. 先ほどの演習の各コマンド実行時の結果を見返してみて、実際にはどんなSQLが出力されたのか確認してみましょう。
+    - ```rb
+        irb(main):003:0> michael = User.find_by(name: "Michael Example")
+        (0.7ms)  SET NAMES utf8,  @@SESSION.sql_mode = CONCAT(CONCAT(@@sql_mode, ',STRICT_ALL_TABLES'), ',NO_AUTO_VALUE_ON_ZERO'),  @@SESSION.time_zone = 'Asia/Tokyo', @@SESSION.sql_auto_is_null = 0, @@SESSION.wait_timeout = 2147483
+        User Load (1.6ms)  SELECT  `users`.* FROM `users` WHERE `users`.`name` = 'Michael Example' LIMIT 1
+        irb(main):004:0> michael
+        => #<User id: 762146111, name: "Michael Example", email: "michael@example.com", created_at: "2023-11-05 10:17:16", updated_at: "2023-11-05 10:17:16", password_digest: "$2a$04$bfJA0o3YtslDOG.pOFdU.u.hdRm2x5WGp.dLSLb.vRs...", reset_digest: nil, reset_sent_at: nil>
+        irb(main):005:0> archer = User.find_by(name: "Sterling Archer")
+        User Load (3.3ms)  SELECT  `users`.* FROM `users` WHERE `users`.`name` = 'Sterling Archer' LIMIT 1
+        => #<User id: 950961012, name: "Sterling Archer", email: "duchess@example.gov", created_at: "2023-11-05 10:1...
+        irb(main):006:0> assert_not michael.following?(archer)
+        User Exists (4.2ms)  SELECT  1 AS one FROM `users` INNER JOIN `relationships` ON `users`.`id` = `relationships`.`followed_id` WHERE `relationships`.`follower_id` = 762146111 AND `users`.`id` = 950961012 LIMIT 1
+                1: from (irb):6
+        NoMethodError (undefined method `assert_not' for main:Object)
+        irb(main):007:0> michael.following?(archer) 
+        User Exists (4.1ms)  SELECT  1 AS one FROM `users` INNER JOIN `relationships` ON `users`.`id` = `relationships`.`followed_id` WHERE `relationships`.`follower_id` = 762146111 AND `users`.`id` = 950961012 LIMIT 1
+        => false
+        irb(main):008:0> michael.follow(archer)
+        (1.3ms)  BEGIN
+        User Load (3.3ms)  SELECT  `users`.* FROM `users` WHERE `users`.`id` = 762146111 LIMIT 1
+        SQL (2.6ms)  INSERT INTO `relationships` (`follower_id`, `followed_id`, `created_at`, `updated_at`) VALUES (762146111, 950961012, '2023-11-05 21:49:31', '2023-11-05 21:49:31')
+        (2.3ms)  COMMIT
+        User Load (7.4ms)  SELECT  `users`.* FROM `users` INNER JOIN `relationships` ON `users`.`id` = `relationships`.`followed_id` WHERE `relationships`.`follower_id` = 762146111 LIMIT 11
+        => #<ActiveRecord::Associations::CollectionProxy [#<User id: 950961012, name: "Sterling Archer", email: "duchess@example.gov", created_at: "2023-11-05 10:17:16", updated_at: "2023-11-05 10:17:16", password_digest: "$2a$04$066imyGfbh.As6c8mFxcUefkQW7wiu0bSRZ3D/3QQ4S...", remember_digest: nil, admin: false, activation_digest: nil, activated: true, activated_at: "2023-11-05 10:17:16", reset_digest: nil, reset_sent_at: nil>]>
+        irb(main):009:0> michael.following?(archer)
+        User Exists (2.8ms)  SELECT  1 AS one FROM `users` INNER JOIN `relationships` ON `users`.`id` = `relationships`.`followed_id` WHERE `relationships`.`follower_id` = 762146111 AND `users`.`id` = 950961012 LIMIT 1
+        => true
+        irb(main):010:0> michael.unfollow(archer)
+        Relationship Load (2.5ms)  SELECT  `relationships`.* FROM `relationships` WHERE `relationships`.`follower_id` = 762146111 AND `relationships`.`followed_id` = 950961012 LIMIT 1
+        (0.7ms)  BEGIN
+        SQL (2.2ms)  DELETE FROM `relationships` WHERE `relationships`.`id` = 2
+        (2.7ms)  COMMIT
+        => #<Relationship id: 2, follower_id: 762146111, followed_id: 950961012, created_at: "2023-11-05 12:49:31", updated_at: "2023-11-05 12:49:31">
+        irb(main):011:0> michael.following?(archer)
+        User Exists (2.8ms)  SELECT  1 AS one FROM `users` INNER JOIN `relationships` ON `users`.`id` = `relationships`.`followed_id` WHERE `relationships`.`follower_id` = 762146111 AND `users`.`id` = 950961012 LIMIT 1
+        => false
+    ```
+8. コンソールを開き、何人かのユーザーが最初のユーザーをフォローしている状況を作ってみてください。最初のユーザーをuserとすると、user.followers.map(&:id)の値はどのようになっているでしょうか?
+    - ```rb
+        irb(main):007:0> user.followers.map(&:id)
+        User Load (10.9ms)  SELECT `users`.* FROM `users` INNER JOIN `relationships` ON `users`.`id` = `relationships`.`follower_id` WHERE `relationships`.`followed_id` = 1
+        => [2, 3]
+      ```
+9. 上の演習が終わったら、user.followers.countの実行結果が、先ほどフォローさせたユーザー数と一致していることを確認してみましょう。
+    - ```rb
+        irb(main):008:0> user.followers.count
+        (7.5ms)  SELECT COUNT(*) FROM `users` INNER JOIN `relationships` ON `users`.`id` = `relationships`.`follower_id` WHERE `relationships`.`followed_id` = 1
+        => 2
+      ```
+10. user.followers.countを実行した結果、出力されるSQL文はどのような内容になっているでしょうか? また、user.followers.to_a.countの実行結果と違っている箇所はありますか? ヒント: もしuserに100万人のフォロワーがいた場合、どのような違いがあるでしょうか? 考えてみてください。
+    - SQL
+        - ```sql
+            SELECT COUNT(*) FROM `users` INNER JOIN `relationships` ON `users`.`id` = `relationships`.`follower_id` WHERE `relationships`.`followed_id` = 1
+          ```
+    - user.followers.to_a.countの実行結果と違っている箇所はありますか?
+        - メモリの消費量に違いが出る
+        - user.followers.count と user.followers.to_a.count の主な違いは、前者がデータベースレベルでカウントを行い、後者がRubyの配列操作を使用してカウントを行う点
+
+11. コンソールを開き、User.first.followers.countの結果がリスト 14.14で期待している結果と合致していることを確認してみましょう。
+12. 先ほどの演習と同様に、User.first.following.countの結果も合致していることを確認してみましょう。
+    - ```rb
+        irb(main):002:0> User.first.followers.count
+        (1.3ms)  SET NAMES utf8,  @@SESSION.sql_mode = CONCAT(CONCAT(@@sql_mode, ',STRICT_ALL_TABLES'), ',NO_AUTO_VALUE_ON_ZERO'),  @@SESSION.time_zone = 'Asia/Tokyo', @@SESSION.sql_auto_is_null = 0, @@SESSION.wait_timeout = 2147483
+        User Load (1.3ms)  SELECT  `users`.* FROM `users` ORDER BY `users`.`id` ASC LIMIT 1
+        (3.7ms)  SELECT COUNT(*) FROM `users` INNER JOIN `relationships` ON `users`.`id` = `relationships`.`follower_id` WHERE `relationships`.`followed_id` = 1
+        => 38
+        irb(main):003:0> User.first.following.count
+        User Load (5.0ms)  SELECT  `users`.* FROM `users` ORDER BY `users`.`id` ASC LIMIT 1
+        (8.7ms)  SELECT COUNT(*) FROM `users` INNER JOIN `relationships` ON `users`.`id` = `relationships`.`followed_id` WHERE `relationships`.`follower_id` = 1
+        => 49
+      ```
+13. ブラウザから /users/2 にアクセスし、フォローボタンが表示されていることを確認してみましょう。同様に、/users/5 では [Unfollow] ボタンが表示されているはずです。さて、/users/1 にアクセスすると、どのような結果が表示されるでしょうか?
+    - /user/1にアクセスするとフォローボタン、あんフォローボタンのどちらも表示されません。
+14. ブラウザからHomeページとプロフィールページを表示してみて、統計情報が正しく表示されているか確認してみましょう。
+    - 表示されています。
+15. Homeページに表示されている統計情報に対してテストを書いてみましょう。同様にして、プロフィールページにもテストを追加してみましょう。ヒント: リスト 13.28で示したテストに追加してみてください。
+    - [関連コミット](https://github.com/yanase-kenta0505/rails_tutorial_sample_app/commit/4bc7f4ce809479602631cc0fde74ee5c8f8b4930)
+
+16. ブラウザから /users/1/followers と /users/1/following を開き、それぞれが適切に表示されていることを確認してみましょう。サイドバーにある画像は、リンクとしてうまく機能しているでしょうか?
+    - 確認しました
+17. リスト 14.29のassert_selectに関連するコードをコメントアウトしてみて、テストが正しく red に変わることを確認してみましょう。
+    - 確認しました
+
+18. ブラウザ上から /users/2 を開き、[Follow] と [Unfollow] を実行してみましょう。うまく機能しているでしょうか?
+    - 確認しました
+19. 先ほどの演習を終えたら、Railsサーバーのログを見てみましょう。フォロー/フォロー解除が実行されると、それぞれどのテンプレートが描画されているでしょうか?
+    - ```rb
+        Started POST "/relationships" for 192.168.65.1 at 2023-11-06 14:32:13 +0900
+        sample_app-web-1  | Cannot render console from 192.168.65.1! Allowed networks: 127.0.0.1, ::1, 127.0.0.0/127.255.255.255
+        sample_app-web-1  | Processing by RelationshipsController#create as HTML
+        sample_app-web-1  |   Parameters: {"utf8"=>"✓", "authenticity_token"=>"6oHo5sn5sWeuylE8HwbMmKaVL0wqDZMKD9STIQSRCiHTusV+GiTLmiGwfYd4JD9FPgiG4+qz1AF8vGixSZW0ug==", "followed_id"=>"2", "commit"=>"Follow"}
+        sample_app-web-1  |   User Load (8.1ms)  SELECT  `users`.* FROM `users` WHERE `users`.`id` = 1 LIMIT 1
+        sample_app-web-1  |   User Load (1.1ms)  SELECT  `users`.* FROM `users` WHERE `users`.`id` = 2 LIMIT 1
+        sample_app-web-1  |    (0.3ms)  BEGIN
+        sample_app-web-1  |   CACHE User Load (0.0ms)  SELECT  `users`.* FROM `users` WHERE `users`.`id` = 1 LIMIT 1  [["id", 1], ["LIMIT", 1]]
+        sample_app-web-1  |   SQL (1.6ms)  INSERT INTO `relationships` (`follower_id`, `followed_id`, `created_at`, `updated_at`) VALUES (1, 2, '2023-11-06 14:32:13', '2023-11-06 14:32:13')
+        sample_app-web-1  |    (1.6ms)  COMMIT
+        sample_app-web-1  | Redirected to http://localhost:3000/users/2
+        sample_app-web-1  | Completed 302 Found in 32ms (ActiveRecord: 12.8ms)
+        sample_app-web-1  |
+        sample_app-web-1  |
+        sample_app-web-1  | Started GET "/users/2" for 192.168.65.1 at 2023-11-06 14:32:13 +0900
+        sample_app-web-1  | Cannot render console from 192.168.65.1! Allowed networks: 127.0.0.1, ::1, 127.0.0.0/127.255.255.255
+        sample_app-web-1  | Processing by UsersController#show as HTML
+        sample_app-web-1  |   Parameters: {"id"=>"2"}
+        sample_app-web-1  |   User Load (1.2ms)  SELECT  `users`.* FROM `users` WHERE `users`.`id` = 2 LIMIT 1
+        sample_app-web-1  |   Rendering users/show.html.erb within layouts/application
+        sample_app-web-1  |    (1.7ms)  SELECT COUNT(*) FROM `users` INNER JOIN `relationships` ON `users`.`id` = `relationships`.`followed_id` WHERE `relationships`.`follower_id` = 2
+        sample_app-web-1  |    (1.1ms)  SELECT COUNT(*) FROM `users` INNER JOIN `relationships` ON `users`.`id` = `relationships`.`follower_id` WHERE `relationships`.`followed_id` = 2
+        sample_app-web-1  |   Rendered shared/_stats.html.erb (6.7ms)
+        sample_app-web-1  |   User Load (0.6ms)  SELECT  `users`.* FROM `users` WHERE `users`.`id` = 1 LIMIT 1
+        sample_app-web-1  |   User Exists (0.5ms)  SELECT  1 AS one FROM `users` INNER JOIN `relationships` ON `users`.`id` = `relationships`.`followed_id` WHERE `relationships`.`follower_id` = 1 AND `users`.`id` = 2 LIMIT 1
+        sample_app-web-1  |   Relationship Load (0.5ms)  SELECT  `relationships`.* FROM `relationships` WHERE `relationships`.`follower_id` = 1 AND `relationships`.`followed_id` = 2 LIMIT 1
+        sample_app-web-1  |   Rendered users/_unfollow.html.erb (2.4ms)
+        sample_app-web-1  |   Rendered users/_follow_form.html.erb (6.3ms)
+        sample_app-web-1  |   Micropost Exists (0.6ms)  SELECT  1 AS one FROM `microposts` WHERE `microposts`.`user_id` = 2 LIMIT 1
+        sample_app-web-1  |    (0.5ms)  SELECT COUNT(*) FROM `microposts` WHERE `microposts`.`user_id` = 2
+        sample_app-web-1  |   Micropost Load (3.3ms)  SELECT  `microposts`.* FROM `microposts` WHERE `microposts`.`user_id` = 2 ORDER BY `microposts`.`created_at` DESC LIMIT 30 OFFSET 0
+        sample_app-web-1  |   Rendered collection of microposts/_micropost.html.erb [30 times] (8.4ms)
+        sample_app-web-1  |   CACHE  (0.0ms)  SELECT COUNT(*) FROM `microposts` WHERE `microposts`.`user_id` = 2  [["user_id", 2]]
+        sample_app-web-1  |   Rendered users/show.html.erb within layouts/application (49.4ms)
+        sample_app-web-1  |   Rendered layouts/_rails_default.html.erb (29.3ms)
+        sample_app-web-1  |   Rendered layouts/_shim.html.erb (0.2ms)
+        sample_app-web-1  |   Rendered layouts/_header.html.erb (0.6ms)
+        sample_app-web-1  |   Rendered layouts/_footer.html.erb (0.2ms)
+        sample_app-web-1  | Completed 200 OK in 108ms (Views: 91.5ms | ActiveRecord: 10.0ms)
+        sample_app-web-1  |
+        sample_app-web-1  |
+        sample_app-web-1  | Started DELETE "/relationships/89" for 192.168.65.1 at 2023-11-06 14:32:22 +0900
+        sample_app-web-1  | Cannot render console from 192.168.65.1! Allowed networks: 127.0.0.1, ::1, 127.0.0.0/127.255.255.255
+        sample_app-web-1  | Processing by RelationshipsController#destroy as HTML
+        sample_app-web-1  |   Parameters: {"utf8"=>"✓", "authenticity_token"=>"truxvO2B/8YF9/oZ0zpFMBkmIX6cr8AHCP9BR56H9y+PgJwkPlyFO4qN1qK0GLbtgbuI0VwRhwx7l7rX04NJtA==", "commit"=>"Unfollow", "id"=>"89"}
+        sample_app-web-1  |   User Load (1.8ms)  SELECT  `users`.* FROM `users` WHERE `users`.`id` = 1 LIMIT 1
+        sample_app-web-1  |   Relationship Load (1.2ms)  SELECT  `relationships`.* FROM `relationships` WHERE `relationships`.`id` = 89 LIMIT 1
+        sample_app-web-1  |   User Load (2.5ms)  SELECT  `users`.* FROM `users` WHERE `users`.`id` = 2 LIMIT 1
+        sample_app-web-1  |   Relationship Load (4.5ms)  SELECT  `relationships`.* FROM `relationships` WHERE `relationships`.`follower_id` = 1 AND `relationships`.`followed_id` = 2 LIMIT 1
+        sample_app-web-1  |    (1.1ms)  BEGIN
+        sample_app-web-1  |   SQL (1.3ms)  DELETE FROM `relationships` WHERE `relationships`.`id` = 89
+        sample_app-web-1  |    (1.9ms)  COMMIT
+        sample_app-web-1  | Redirected to http://localhost:3000/users/2
+        sample_app-web-1  | Completed 302 Found in 25ms (ActiveRecord: 14.3ms)
+        sample_app-web-1  |
+        sample_app-web-1  |
+        sample_app-web-1  | Started GET "/users/2" for 192.168.65.1 at 2023-11-06 14:32:22 +0900
+        sample_app-web-1  | Cannot render console from 192.168.65.1! Allowed networks: 127.0.0.1, ::1, 127.0.0.0/127.255.255.255
+        sample_app-web-1  | Processing by UsersController#show as HTML
+        sample_app-web-1  |   Parameters: {"id"=>"2"}
+        sample_app-web-1  |   User Load (1.1ms)  SELECT  `users`.* FROM `users` WHERE `users`.`id` = 2 LIMIT 1
+        sample_app-web-1  |   Rendering users/show.html.erb within layouts/application
+        sample_app-web-1  |    (1.8ms)  SELECT COUNT(*) FROM `users` INNER JOIN `relationships` ON `users`.`id` = `relationships`.`followed_id` WHERE `relationships`.`follower_id` = 2
+        sample_app-web-1  |    (1.0ms)  SELECT COUNT(*) FROM `users` INNER JOIN `relationships` ON `users`.`id` = `relationships`.`follower_id` WHERE `relationships`.`followed_id` = 2
+        sample_app-web-1  |   Rendered shared/_stats.html.erb (5.6ms)
+        sample_app-web-1  |   User Load (0.8ms)  SELECT  `users`.* FROM `users` WHERE `users`.`id` = 1 LIMIT 1
+        sample_app-web-1  |   User Exists (0.7ms)  SELECT  1 AS one FROM `users` INNER JOIN `relationships` ON `users`.`id` = `relationships`.`followed_id` WHERE `relationships`.`follower_id` = 1 AND `users`.`id` = 2 LIMIT 1
+        sample_app-web-1  |   Rendered users/_follow.html.erb (0.8ms)
+        sample_app-web-1  |   Rendered users/_follow_form.html.erb (5.4ms)
+        sample_app-web-1  |   Micropost Exists (0.7ms)  SELECT  1 AS one FROM `microposts` WHERE `microposts`.`user_id` = 2 LIMIT 1
+        sample_app-web-1  |    (1.4ms)  SELECT COUNT(*) FROM `microposts` WHERE `microposts`.`user_id` = 2
+        sample_app-web-1  |   Micropost Load (2.0ms)  SELECT  `microposts`.* FROM `microposts` WHERE `microposts`.`user_id` = 2 ORDER BY `microposts`.`created_at` DESC LIMIT 30 OFFSET 0
+        sample_app-web-1  |   Rendered collection of microposts/_micropost.html.erb [30 times] (4.5ms)
+        sample_app-web-1  |   CACHE  (0.0ms)  SELECT COUNT(*) FROM `microposts` WHERE `microposts`.`user_id` = 2  [["user_id", 2]]
+        sample_app-web-1  |   Rendered users/show.html.erb within layouts/application (33.1ms)
+        sample_app-web-1  |   Rendered layouts/_rails_default.html.erb (26.0ms)
+        sample_app-web-1  |   Rendered layouts/_shim.html.erb (0.2ms)
+        sample_app-web-1  |   Rendered layouts/_header.html.erb (0.5ms)
+        sample_app-web-1  |   Rendered layouts/_footer.html.erb (0.2ms)
+        sample_app-web-1  | Completed 200 OK in 83ms (Views: 69.6ms | ActiveRecord: 9.4ms)
+      ```
+20. ブラウザから /users/2 にアクセスし、うまく動いているかどうか確認してみましょう。
+    - うまく動作しています。
+21. 先ほどの演習で確認が終わったら、Railsサーバーのログを閲覧し、フォロー/フォロー解除を実行した直後のテンプレートがどうなっているか確認してみましょう。
+    - ```rb
+        sample_app-web-1  | Started POST "/relationships" for 192.168.65.1 at 2023-11-06 15:47:36 +0900
+        sample_app-web-1  | Cannot render console from 192.168.65.1! Allowed networks: 127.0.0.1, ::1, 127.0.0.0/127.255.255.255
+        sample_app-web-1  | Processing by RelationshipsController#create as JS
+        sample_app-web-1  |   Parameters: {"utf8"=>"✓", "followed_id"=>"2", "commit"=>"Follow"}
+        sample_app-web-1  |   User Load (6.0ms)  SELECT  `users`.* FROM `users` WHERE `users`.`id` = 1 LIMIT 1
+        sample_app-web-1  |   User Load (1.3ms)  SELECT  `users`.* FROM `users` WHERE `users`.`id` = 2 LIMIT 1
+        sample_app-web-1  |    (0.3ms)  BEGIN
+        sample_app-web-1  |   CACHE User Load (0.0ms)  SELECT  `users`.* FROM `users` WHERE `users`.`id` = 1 LIMIT 1  [["id", 1], ["LIMIT", 1]]
+        sample_app-web-1  |   SQL (2.9ms)  INSERT INTO `relationships` (`follower_id`, `followed_id`, `created_at`, `updated_at`) VALUES (1, 2, '2023-11-06 15:47:36', '2023-11-06 15:47:36')
+        sample_app-web-1  |    (2.3ms)  COMMIT
+        sample_app-web-1  |   Rendering relationships/create.js.erb
+        sample_app-web-1  |   Relationship Load (1.2ms)  SELECT  `relationships`.* FROM `relationships` WHERE `relationships`.`follower_id` = 1 AND `relationships`.`followed_id` = 2 LIMIT 1
+        sample_app-web-1  |   Rendered users/_unfollow.html.erb (2.8ms)
+        sample_app-web-1  |    (1.6ms)  SELECT COUNT(*) FROM `users` INNER JOIN `relationships` ON `users`.`id` = `relationships`.`follower_id` WHERE `relationships`.`followed_id` = 2
+        sample_app-web-1  |   Rendered relationships/create.js.erb (10.3ms)
+        sample_app-web-1  | Completed 200 OK in 52ms (Views: 18.5ms | ActiveRecord: 15.5ms)
+        sample_app-web-1  |
+        sample_app-web-1  |
+        sample_app-web-1  | Started DELETE "/relationships/90" for 192.168.65.1 at 2023-11-06 15:47:38 +0900
+        sample_app-web-1  | Cannot render console from 192.168.65.1! Allowed networks: 127.0.0.1, ::1, 127.0.0.0/127.255.255.255
+        sample_app-web-1  | Processing by RelationshipsController#destroy as JS
+        sample_app-web-1  |   Parameters: {"utf8"=>"✓", "commit"=>"Unfollow", "id"=>"90"}
+        sample_app-web-1  |   User Load (5.1ms)  SELECT  `users`.* FROM `users` WHERE `users`.`id` = 1 LIMIT 1
+        sample_app-web-1  |   Relationship Load (3.2ms)  SELECT  `relationships`.* FROM `relationships` WHERE `relationships`.`id` = 90 LIMIT 1
+        sample_app-web-1  |   User Load (1.4ms)  SELECT  `users`.* FROM `users` WHERE `users`.`id` = 2 LIMIT 1
+        sample_app-web-1  |   Relationship Load (1.1ms)  SELECT  `relationships`.* FROM `relationships` WHERE `relationships`.`follower_id` = 1 AND `relationships`.`followed_id` = 2 LIMIT 1
+        sample_app-web-1  |    (0.3ms)  BEGIN
+        sample_app-web-1  |   SQL (1.6ms)  DELETE FROM `relationships` WHERE `relationships`.`id` = 90
+        sample_app-web-1  |    (2.3ms)  COMMIT
+        sample_app-web-1  |   Rendering relationships/destroy.js.erb
+        sample_app-web-1  |   Rendered users/_follow.html.erb (0.9ms)
+        sample_app-web-1  |    (1.4ms)  SELECT COUNT(*) FROM `users` INNER JOIN `relationships` ON `users`.`id` = `relationships`.`follower_id` WHERE `relationships`.`followed_id` = 2
+        sample_app-web-1  |   Rendered relationships/destroy.js.erb (8.1ms)
+        sample_app-web-1  | Completed 200 OK in 52ms (Views: 18.5ms | ActiveRecord: 16.4ms)
+      ```
+
+22. リスト 14.36のrespond_toブロック内の各行を順にコメントアウトしていき、テストが正しくエラーを検知できるかどうか確認してみましょう。実際、どのテストケースが落ちたでしょうか?
+    - create側
+        - `format.html { redirect_to @user }`をコメントアウト
+            - ```rb
+            claves@clavesnoMacBook-Air sample_app % rails test
+            Started with run options --seed 50117
+
+            ERROR["test_should_follow_a_user_the_standard_way", FollowingTest, 1.9014809997752309]
+            test_should_follow_a_user_the_standard_way#FollowingTest (1.90s)
+            ActionController::UnknownFormat:         ActionController::UnknownFormat: ActionController::UnknownFormat
+                        app/controllers/relationships_controller.rb:7:in `create'
+                        test/integration/following_test.rb:31:in `block (2 levels) in <class:FollowingTest>'
+                        test/integration/following_test.rb:30:in `block in <class:FollowingTest>'
+
+            76/76: [==================================================================] 100% Time: 00:00:01, Time: 00:00:01
+
+            Finished in 1.99055s
+            76 tests, 398 assertions, 0 failures, 1 errors, 0 skips
+          ```
+        - `format.js`をコメントアウト
+            - ```rb
+                claves@clavesnoMacBook-Air sample_app % rails test
+                Started with run options --seed 53160
+
+                ERROR["test_should_follow_a_user_the_standard_way", FollowingTest, 2.3857260001823306]
+                test_should_follow_a_user_the_standard_way#FollowingTest (2.39s)
+                ActionController::UnknownFormat:         ActionController::UnknownFormat: ActionController::UnknownFormat
+                            app/controllers/relationships_controller.rb:7:in `create'
+                            test/integration/following_test.rb:31:in `block (2 levels) in <class:FollowingTest>'
+                            test/integration/following_test.rb:30:in `block in <class:FollowingTest>'
+
+                ERROR["test_should_follow_a_user_with_Ajax", FollowingTest, 2.523993000155315]
+                test_should_follow_a_user_with_Ajax#FollowingTest (2.52s)
+                ActionController::UnknownFormat:         ActionController::UnknownFormat: ActionController::UnknownFormat
+                            app/controllers/relationships_controller.rb:7:in `create'
+                            test/integration/following_test.rb:37:in `block (2 levels) in <class:FollowingTest>'
+                            test/integration/following_test.rb:36:in `block in <class:FollowingTest>'
+
+                76/76: [==================================================================] 100% Time: 00:00:02, Time: 00:00:02
+
+                Finished in 2.63607s
+                76 tests, 397 assertions, 0 failures, 2 errors, 0 skips
+              ```
+23. リスト 14.40のxhr: trueがある行のうち、片方のみを削除するとどういった結果になるでしょうか? このとき発生する問題の原因と、なぜ先ほどの演習で確認したテストがこの問題を検知できたのか考えてみてください。
+    - 結果
+        - ```rb
+            claves@clavesnoMacBook-Air sample_app % rails test
+            Started with run options --seed 3725
+
+            FAIL["test_should_unfollow_a_user_with_Ajax", FollowingTest, 1.9850830000359565]
+            test_should_unfollow_a_user_with_Ajax#FollowingTest (1.99s)
+                    "@user.following.count" didn't change by -1.
+                    Expected: 2
+                    Actual: 3
+                    test/integration/following_test.rb:52:in `block in <class:FollowingTest>'
+
+            76/76: [==================================================================] 100% Time: 00:00:02, Time: 00:00:02
+
+            Finished in 2.54222s
+            76 tests, 399 assertions, 1 failures, 0 errors, 0 skips
+          ```
+
+    - 原因
+        - Ajaxリクエストとして送信されるべきリクエストが通常のHTTPリクエストとして扱われることになる。これにより、コントローラが期待するformat.jsの代わりにformat.htmlを探すことになり、テストが失敗する。
+
+    - 問題を検知できた理由
+        - テストがAjaxリクエストに対する適切な応答を期待しているから。
+
+24. マイクロポストのidが正しく並んでいると仮定して (すなわち若いidの投稿ほど古くなる前提で)、図 14.22のデータセットでuser.feed.map(&:id)を実行すると、どのような結果が表示されるでしょうか? 考えてみてください。ヒント: 13.1.4で実装したdefault_scopeを思い出してください。
+    - ```rb
+        irb(main):001:0> user = User.first
+        (1.1ms)  SET NAMES utf8,  @@SESSION.sql_mode = CONCAT(CONCAT(@@sql_mode, ',STRICT_ALL_TABLES'), ',NO_AUTO_VALUE_ON_ZERO'),  @@SESSION.time_zone = 'Asia/Tokyo', @@SESSION.sql_auto_is_null = 0, @@SESSION.wait_timeout = 2147483
+        User Load (1.3ms)  SELECT  `users`.* FROM `users` ORDER BY `users`.`id` ASC LIMIT 1
+        => #<User id: 1, name: "Example User", email: "example@railstutorial.org", created_at: "2023-11-05 13:16:54"...
+        irb(main):002:0> ids = user.feed.map(&:id)
+        Micropost Load (7.4ms)  SELECT `microposts`.* FROM `microposts` WHERE (user_id = 1) ORDER BY `microposts`.`created_at` DESC
+        => [295, 289, 283, 277, 271, 265, 259, 253, 247, 241, 235, 229, 223, 217, 211, 205, 199, 193, 187, 181, 175,...]
+      ```
+
+25. リスト 14.44において、現在のユーザー自身の投稿を含めないようにするにはどうすれば良いでしょうか? また、そのような変更を加えると、リスト 14.42のどのテストが失敗するでしょうか?
+    - ```rb
+        Micropost.where("user_id IN (?)", following_ids)
+      ```
+
+   - 失敗するテスト
+    - ```rb
+        # 自分自身の投稿を確認
+        michael.microposts.each do |post_self|
+            assert michael.feed.include?(post_self)
+        end
+      ```
+26. リスト 14.44において、フォローしているユーザーの投稿を含めないようにするにはどうすれば良いでしょうか? また、そのような変更を加えると、リスト  14.42のどのテストが失敗するでしょうか?
+    - ```rb
+        Micropost.where("user_id = ?", id)
+      ```
+    - 失敗するテスト
+        - ```rb
+            # フォローしているユーザーの投稿を確認
+            lana.microposts.each do |post_following|
+                assert michael.feed.include?(post_following)
+            end
+        ```
+27. リスト 14.44において、フォローしていないユーザーの投稿を含めるためにはどうすれば良いでしょうか? また、そのような変更を加えると、リスト 14.42のどのテストが失敗するでしょうか? ヒント: 自分自身とフォローしているユーザー、そしてそれ以外という集合は、いったいどういった集合を表すのか考えてみてください。
+    - ```rb
+        Micropost.all
+      ```
+    - 失敗するテスト
+        - ```rb
+            # フォローしていないユーザーの投稿を確認
+            archer.microposts.each do |post_unfollowed|
+                assert_not michael.feed.include?(post_unfollowed)
+            end
+        ```
+
+28. Homeページで表示される1ページ目のフィードに対して、統合テストを書いてみましょう。リスト 14.49はそのテンプレートです。
+29. リスト 14.49のコードでは、期待されるHTMLをCGI.escapeHTMLメソッドでエスケープしています (このメソッドは11.2.3で扱ったCGI.escapeと同じ用途です)。このコードでは、なぜHTMLをエスケープさせる必要があったのでしょうか? 考えてみてください。ヒント: 試しにエスケープ処理を外して、得られるHTMLの内容を注意深く調べてください。マイクロポストの内容が何かおかしいはずです。また、ターミナルの検索機能 (Cmd-FもしくはCtrl-F) を使って「sorry」を探すと原因の究明に役立つはずです。
+    - ここは一旦飛ばします
