@@ -42,5 +42,6 @@ group :production do
   # 本番環境でも'mysql2' gemを使用
   gem 'mysql2', '>= 0.4.4', '< 0.6.0'
   gem 'fog', '1.42'
+  gem 'fog-aws'
   gem 'unicorn', '5.4.1'
 end
