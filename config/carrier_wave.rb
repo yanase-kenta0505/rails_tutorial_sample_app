@@ -1,4 +1,4 @@
-config/carrier_wave.rb
+# config/carrier_wave.rb
 
 if Rails.env.production?
     CarrierWave.configure do |config|
